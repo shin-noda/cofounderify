@@ -1,8 +1,8 @@
 // src/components/RoleInputs.tsx
 import React from "react";
-import type { RoleInputsProps } from "../types/RoleInputs";
+import type { RoleInputsProps } from "../../types/RoleInputs";
 
-const RoleInputs: React.FC<RoleInputsProps> = ({ roles, onRoleChange }) => (
+const ProjectRoleInputs: React.FC<RoleInputsProps> = ({ roles, onRoleChange }) => (
   <>
     <label className="block text-sm font-medium text-gray-700">Roles</label>
     {roles.map((role, idx) => (
@@ -19,4 +19,4 @@ const RoleInputs: React.FC<RoleInputsProps> = ({ roles, onRoleChange }) => (
   </>
 );
 
-export default RoleInputs;
+export default ProjectRoleInputs;

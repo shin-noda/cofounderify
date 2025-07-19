@@ -1,6 +1,6 @@
 // src/components/ProjectInfo.tsx
 import React from "react";
-import type { ProjectInfoProps } from "../types/ProjectInfo";
+import type { ProjectInfoProps } from "../../types/ProjectInfo";
 
 const ProjectInfo: React.FC<ProjectInfoProps> = ({
   title,

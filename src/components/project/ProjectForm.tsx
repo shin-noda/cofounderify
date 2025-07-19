@@ -1,0 +1,61 @@
+// src/components/ProjectForm.tsx
+import React from "react";
+import {
+  ProjectRoleInputs,
+  ProjectImageUploader,
+  ProjectAutocompleteLocationPicker,
+  ProjectTitleInput,
+  ProjectMemberCountInput,
+  ProjectDescriptionInput,
+  ProjectSubmitButton,
+} from ".";
+import type { ProjectFormProps } from "../../types/CreateProjectForm";
+
+const ProjectForm: React.FC<ProjectFormProps> = ({
+  formState,
+  setField,
+  handleRoleChange,
+  handleMemberCountChange,
+  handleSubmit,
+}) => (
+  <div className="max-w-md mx-auto mt-8 text-left">
+    <h2 className="text-2xl font-bold mb-4">Create Your Project</h2>
+    
+    <form onSubmit={handleSubmit} className="space-y-4">
+
+      <ProjectTitleInput
+        value={formState.title}
+        onChange={(val) => setField("title", val)}
+      />
+      
+      <ProjectMemberCountInput
+        value={formState.memberCount}
+        onChange={handleMemberCountChange}
+      />
+
+      <ProjectRoleInputs
+        roles={formState.roles}
+        onRoleChange={handleRoleChange}
+      />
+
+      <ProjectDescriptionInput
+        value={formState.description}
+        onChange={(val) => setField("description", val)}
+      />
+
+      <ProjectImageUploader onFileChange={(file) => setField("imageUrl", file || "")} />
+
+      <ProjectAutocompleteLocationPicker
+        location={formState.location}
+        onChange={(loc) => setField("location", loc)}
+      />
+
+      <ProjectSubmitButton
+        loading={formState.loading} 
+      />
+
+    </form>
+  </div>
+);
+
+export default ProjectForm;

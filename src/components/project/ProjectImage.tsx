@@ -1,7 +1,7 @@
 import React from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import 'react-lazy-load-image-component/src/effects/blur.css';
-import type { ProjectImageProps } from "../types/ProjectImage";
+import type { ProjectImageProps } from "../../types/ProjectImage";
 
 const ProjectImage: React.FC<ProjectImageProps> = ({ imageUrl, title }) => {
   return (

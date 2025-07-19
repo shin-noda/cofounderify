@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { getFirestore, collection, query, onSnapshot } from "firebase/firestore";
-import { app } from "../lib/firebase";
+import { app } from "../../lib/firebase";
 import L from "leaflet";
 
 const db = getFirestore(app);

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { app } from "../lib/firebase";
+import { app } from "../../lib/firebase";
 
 interface Project {
   id: string;

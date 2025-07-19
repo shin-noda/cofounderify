@@ -1,6 +1,6 @@
 // src/components/SearchBar.tsx
 import React, { useState, useEffect } from "react";
-import type { SearchBarProps } from "../types/SearchBar";
+import type { SearchBarProps } from "../../types/SearchBar";
 
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,

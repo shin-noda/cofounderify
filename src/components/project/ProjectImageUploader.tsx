@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import type { ImageUploaderProps } from "../types/ImageUploader";
+import type { ImageUploaderProps } from "../../types/ImageUploader";
 
 const CLOUD_NAME = "dkcawefqk"; 
 const UPLOAD_PRESET = "unsigned_upload";
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ onFileChange }) => {
+const ProjectImageUploader: React.FC<ImageUploaderProps> = ({ onFileChange }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -85,4 +85,4 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onFileChange }) => {
   );
 };
 
-export default ImageUploader;
+export default ProjectImageUploader;
