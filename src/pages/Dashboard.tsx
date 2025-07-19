@@ -1,8 +1,8 @@
 // src/pages/Home.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import ProjectCard from "../components/ProjectCard";
-import SearchBar from "../components/SearchBar";
+import ProjectCard from "../components/dashboard/ProjectCard";
+import SearchBar from "../components/dashboard/SearchBar";
 
 import {
   getFirestore,
@@ -15,7 +15,7 @@ import { app } from "../lib/firebase";
 
 const db = getFirestore(app);
 
-const Home: React.FC = () => {
+const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
@@ -66,4 +66,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default Dashboard;

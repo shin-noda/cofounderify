@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import type { AutocompleteLocationPickerProps, Place, Location } from "../types/AutocompleteLocationPicker";
+import type { AutocompleteLocationPickerProps, Place, Location } from "../../types/AutocompleteLocationPicker";
 
 // Fix leaflet icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -22,7 +22,7 @@ const FlyToLocation: React.FC<{ location: Location | null }> = ({ location }) =>
   return null;
 };
 
-const AutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProps> = ({
+const ProjectAutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProps> = ({
   location,
   onChange,
 }) => {
@@ -119,4 +119,4 @@ const AutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProps> = ({
   );
 };
 
-export default AutocompleteLocationPicker;
+export default ProjectAutocompleteLocationPicker;

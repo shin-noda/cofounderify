@@ -1,7 +1,7 @@
 // src/components/ProjectCard.tsx
 import React from "react";
-import { ProjectImage, ProjectInfo } from "../components";
-import type { ProjectCardProps } from "../types/ProjectCard";
+import { ProjectImage, ProjectInfo } from "../project";
+import type { ProjectCardProps } from "../../types/ProjectCard";
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   title,

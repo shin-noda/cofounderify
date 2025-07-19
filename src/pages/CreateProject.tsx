@@ -3,11 +3,11 @@ import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/fire
 import { app } from "../lib/firebase";
 
 import type { CreateProjectFormProps, CreateProjectFormState } from "../types/CreateProjectForm";
-import ProjectForm from "../components/ProjectForm";
+import ProjectForm from "../components/project/ProjectForm";
 
 const db = getFirestore(app);
 
-const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
+const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
   const initialState: CreateProjectFormState = {
     title: "",
     memberCount: 1,
@@ -83,4 +83,4 @@ const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
   );
 };
 
-export default CreateProjectForm;
+export default CreateProject;
