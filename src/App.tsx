@@ -1,19 +1,25 @@
+// src/App.tsx
 import { Route, Routes, useNavigate } from "react-router-dom";
+
+import {
+  CreateProjectForm,
+  About,
+  Contact,
+  PrivacyPolicy,
+  TermsOfUse,
+  Register,
+  NotFound,
+  Dashboard,
+  CookiePolicy,
+  SignIn,
+} from "./pages";
 
 import Navigation from "./components/navigation/Navigation";
 import Footer from "./components/footer/Footer";
-import CreateProjectForm from "./pages/CreateProject";
 import ProjectMap from "./components/projectMap/ProjectMap";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfUse from "./pages/TermsOfUse";
 import ProjectDetail from "./components/dashboard/ProjectDetail";
-import Register from "./pages/Register";
-import NotFound from "./pages/NotFound";
-import Dashboard from "./pages/Dashboard";
 import CookieConsent from "./components/cookie/CookieConsent";
-import CookiePolicy from "./pages/CookiePolicy";
+import PrivateRoute from "./components/privateRoute/PrivateRoute";
 
 function App() {
   const navigate = useNavigate();
@@ -24,25 +30,31 @@ function App() {
 
       <main className="flex-grow pt-20 pb-12 p-4 bg-gray-50">
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<Register />} /> {/* maybe change later */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route
-            path="/create"
-            element={
-              <CreateProjectForm
-                onSuccess={() => {
-                  navigate("/dashboard"); // maybe redirect to dashboard after project
-                }}
-              />
-            }
-          />
-          <Route path="/map" element={<ProjectMap />} />
+          <Route path="/signin" element={<SignIn />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfUse />} />
-          <Route path="/project/:id" element={<ProjectDetail />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
+
+          {/* Protected routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route
+              path="/create"
+              element={
+                <CreateProjectForm
+                  onSuccess={() => {
+                    navigate("/dashboard"); // redirect after project creation
+                  }}
+                />
+              }
+            />
+            <Route path="/map" element={<ProjectMap />} />
+            <Route path="/project/:id" element={<ProjectDetail />} />
+          </Route>
 
           {/* NotFound page */}
           <Route path="*" element={<NotFound />} />

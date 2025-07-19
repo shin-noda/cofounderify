@@ -16,6 +16,7 @@ import {
   RegisterPhotoUpload,
   RegisterErrorMessage,
   RegisterSubmitButton,
+  RegisterLinkToSignIn,
 } from ".";
 
 const auth = getAuth(app);
@@ -142,6 +143,8 @@ const RegisterForm: React.FC = () => {
         loading={loading}
         onClick={handleGoogleSignIn} 
       />
+
+      <RegisterLinkToSignIn />
     </div>
   );
 };
