@@ -10,3 +10,4 @@ export { default as RegisterSkills } from "./RegisterSkills";
 export { default as RegisterPhotoUpload } from "./RegisterPhotoUpload";
 export { default as RegisterErrorMessage } from "./RegisterErrorMessage";
 export { default as RegisterSubmitButton } from "./RegisterSubmitButton";
+export { default as RegisterLinkToSignIn } from "./RegisterLinkToSignIn";
