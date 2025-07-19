@@ -1,69 +1,39 @@
-# React + TypeScript + Vite
+# CoFounderify
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CoFounderify is a platform designed to help entrepreneurs and innovators find co-founders and collaborators for their projects. Users can browse projects, create new ones, search by keywords, and view detailed project information. The app also features pages like About, Contact, Privacy Policy, Terms of Use, and an interactive project map.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Browse and search projects
+- Create new projects with detailed roles and member counts
+- View individual project details
+- Responsive navigation with React Router
+- Project map visualization
+- Informational pages: About, Contact, Privacy Policy, Terms of Use
+- Firebase Firestore integration for real-time data syncing
+- Image uploads handled via Cloudinary (or similar service)
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React with TypeScript
+- React Router for client-side routing
+- Firebase Firestore for backend data storage
+- Tailwind CSS for styling
+- Cloudinary (optional) for image hosting
+- Vite for build tooling
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Node.js (v16+ recommended)
+- Firebase account and Firestore database
+- Cloudinary account (optional, for image uploads)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Installation
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Clone the repo:
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+```bash
+git clone https://github.com/yourusername/cofounderify.git
+cd cofounderify
