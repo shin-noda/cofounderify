@@ -29,7 +29,7 @@ const SignIn: React.FC = () => {
       await signInWithEmailAndPassword(auth, email, password);
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to sign in");
+      setError("Email or password is incorrect.");
     } finally {
       setLoading(false);
     }

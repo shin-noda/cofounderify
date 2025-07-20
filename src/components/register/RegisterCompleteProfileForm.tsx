@@ -112,7 +112,9 @@ const RegisterCompleteProfileForm: React.FC = () => {
         { merge: true }
       );
 
+      // Navigate and refresh to re-trigger app state logic
       navigate("/dashboard");
+      window.location.reload();
     } catch (err: any) {
       setError(err.message || "Failed to complete profile.");
     } finally {
