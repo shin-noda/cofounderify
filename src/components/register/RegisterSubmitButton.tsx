@@ -1,19 +1,18 @@
-// src/components/RegisterSubmitButton.tsx
+// src/components/register/RegisterSubmitButton.tsx
 import React from "react";
 
-type Props = {
+interface RegisterSubmitButtonProps {
   loading: boolean;
-  onClick: () => void;
-};
+}
 
-const RegisterSubmitButton: React.FC<Props> = ({ loading, onClick }) => {
+const RegisterSubmitButton: React.FC<RegisterSubmitButtonProps> = ({ loading }) => {
   return (
     <button
-      onClick={onClick}
+      type="submit"
       disabled={loading}
-      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded"
+      className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
     >
-      {loading ? "Signing in..." : "Sign in with Google & Register"}
+      {loading ? "Registering..." : "Register"}
     </button>
   );
 };
