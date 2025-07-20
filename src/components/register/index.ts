@@ -11,3 +11,7 @@ export { default as RegisterPhotoUpload } from "./RegisterPhotoUpload";
 export { default as RegisterErrorMessage } from "./RegisterErrorMessage";
 export { default as RegisterSubmitButton } from "./RegisterSubmitButton";
 export { default as RegisterLinkToSignIn } from "./RegisterLinkToSignIn";
+export { default as RegisterDividerOr } from "./RegisterDividerOr";
+export { default as RegisterGoogleButton } from "./RegisterWithGoogleButton";
+export { default as RegisterEmailInput } from "./RegisterEmailInput";
+export { default as RegisterPasswordInput } from "./RegisterPasswordInput";

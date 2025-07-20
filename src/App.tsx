@@ -20,6 +20,7 @@ import ProjectMap from "./components/projectMap/ProjectMap";
 import ProjectDetail from "./components/dashboard/ProjectDetail";
 import CookieConsent from "./components/cookie/CookieConsent";
 import PrivateRoute from "./components/privateRoute/PrivateRoute";
+import RegisterCompleteProfileForm from "./components/register/RegisterCompleteProfileForm";
 
 function App() {
   const navigate = useNavigate();
@@ -54,6 +55,9 @@ function App() {
             />
             <Route path="/map" element={<ProjectMap />} />
             <Route path="/project/:id" element={<ProjectDetail />} />
+
+            {/* Add complete profile route here */}
+            <Route path="/completeProfile" element={<RegisterCompleteProfileForm />} />
           </Route>
 
           {/* NotFound page */}

@@ -11,9 +11,10 @@ const RegisterLastNameField: React.FC<Props> = ({ value, onChange }) => {
     <input
       type="text"
       name="lastName"
-      placeholder="Last Name (optional)"
+      placeholder="Last Name"
       value={value}
       onChange={onChange}
+      required
       className="w-full border border-gray-300 rounded px-3 py-2"
     />
   );
