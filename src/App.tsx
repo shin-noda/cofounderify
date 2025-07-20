@@ -33,6 +33,7 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Register />} /> {/* maybe change later */}
+          <Route path="/register" element={<Register />} /> {/* <-- Added this line */}
           <Route path="/signin" element={<SignIn />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />

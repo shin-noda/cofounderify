@@ -1,14 +1,16 @@
-// src/components/navigation/NavLinks.tsx
 import React from "react";
 import { NavLink } from "react-router-dom";
+import type { User } from "firebase/auth";
 
 interface NavLinksProps {
+  user: User | null;
   profileMenuOpen: boolean;
   toggleProfileMenu: () => void;
   profileMenuRef: React.RefObject<HTMLDivElement | null>;
   profileButtonRef: React.RefObject<HTMLButtonElement | null>;
   handleLogout: () => void;
-  isMobile?: boolean; // Optional prop to handle mobile styling if needed
+  isMobile?: boolean;
+  closeMenu?: () => void;  // NEW optional callback to close mobile menu
 }
 
 const links = [
@@ -21,13 +23,31 @@ const links = [
 ];
 
 const NavLinks: React.FC<NavLinksProps> = ({
+  user,
   profileMenuOpen,
   toggleProfileMenu,
   profileMenuRef,
   profileButtonRef,
   handleLogout,
   isMobile = false,
+  closeMenu,
 }) => {
+  const getInitials = () => {
+    if (!user?.displayName) return "U";
+    const names = user.displayName.trim().split(" ");
+    if (names.length === 1) return names[0].charAt(0).toUpperCase();
+    return (
+      names[0].charAt(0).toUpperCase() + names[1].charAt(0).toUpperCase()
+    );
+  };
+
+  // Helper to handle link clicks, closing menu on mobile
+  const handleLinkClick = () => {
+    if (isMobile && closeMenu) {
+      closeMenu();
+    }
+  };
+
   return (
     <>
       {links.map(({ name, path }) => (
@@ -35,6 +55,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
           <NavLink
             to={path}
             end
+            onClick={handleLinkClick}  // close mobile menu on click
             className={({ isActive }) =>
               `cursor-pointer hover:underline ${
                 isActive ? "underline font-semibold" : ""
@@ -46,43 +67,102 @@ const NavLinks: React.FC<NavLinksProps> = ({
         </li>
       ))}
 
-      <li className="relative flex items-center">
-        <button
-          ref={profileButtonRef}
-          onClick={toggleProfileMenu}
-          aria-label="Toggle profile menu"
-          className={`${
-            isMobile ? "ml-0" : "ml-4"
-          } w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm font-semibold hover:bg-gray-600`}
-        >
-          U
-        </button>
-
-        {profileMenuOpen && (
-          <div
-            ref={profileMenuRef}
-            className={`absolute ${
-              isMobile ? "left-0" : "right-0"
-            } top-full mt-2 w-40 bg-white text-black rounded shadow-lg z-50 p-2`}
+      {user ? (
+        <li className="relative flex items-center">
+          <button
+            ref={profileButtonRef}
+            onClick={(e) => {
+              e.stopPropagation();  // prevent bubbling and double toggle
+              toggleProfileMenu();
+            }}
+            aria-label="Toggle profile menu"
+            className={`${
+              isMobile ? "ml-0" : "ml-4"
+            } w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm font-semibold hover:bg-gray-600`}
           >
-            <div className="flex justify-end">
+            {getInitials()}
+          </button>
+
+          {profileMenuOpen && (
+            <div
+              ref={profileMenuRef}
+              className={`absolute ${
+                isMobile ? "left-0" : "right-0"
+              } top-full mt-2 w-40 bg-white text-black rounded shadow-lg z-50 p-2`}
+            >
+              <div className="flex justify-end">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();  // STOP BUBBLING here
+                    toggleProfileMenu();
+                  }}
+                  aria-label="Close profile menu"
+                  className="text-2xl font-normal text-black hover:text-gray-700"
+                >
+                  ×
+                </button>
+              </div>
               <button
-                onClick={toggleProfileMenu}
-                aria-label="Close profile menu"
-                className="text-2xl font-normal text-black hover:text-gray-700"
+                onClick={() => {
+                  handleLogout();
+                  if (isMobile && closeMenu) closeMenu();
+                }}
+                className="mt-2 block w-full text-left px-4 py-2 hover:bg-gray-200 text-red-600"
               >
-                ×
+                Log Out
               </button>
             </div>
-            <button
-              onClick={handleLogout}
-              className="mt-2 block w-full text-left px-4 py-2 hover:bg-gray-200 text-red-600"
-            >
-              Log Out
-            </button>
-          </div>
-        )}
-      </li>
+          )}
+        </li>
+      ) : (
+        <>
+          {isMobile ? (
+            <>
+              <li>
+                <NavLink
+                  to="/signin"
+                  onClick={handleLinkClick}
+                  className={({ isActive }) =>
+                    `cursor-pointer hover:underline ${
+                      isActive ? "underline font-semibold" : ""
+                    }`
+                  }
+                >
+                  Sign In
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/register"
+                  onClick={handleLinkClick}
+                  className={({ isActive }) =>
+                    `cursor-pointer hover:underline${
+                      isActive ? "underline font-semibold" : ""
+                    }`
+                  }
+                >
+                  Register
+                </NavLink>
+              </li>
+            </>
+          ) : (
+            <li className="flex space-x-4 ml-4">
+              <NavLink
+                to="/signin"
+                className="px-3 py-1 rounded hover:bg-gray-700"
+              >
+                Sign In
+              </NavLink>
+              <NavLink
+                to="/register"
+                className="px-3 py-1 rounded hover:bg-gray-700"
+              >
+                Register
+              </NavLink>
+            </li>
+          )}
+        </>
+      )}
     </>
   );
 };
