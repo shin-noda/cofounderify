@@ -1,7 +1,9 @@
-export interface Location {
+// types/AutocompleteLocationPicker.ts
+export type Location = {
   lat: number;
   lng: number;
-}
+  address?: string;
+};
 
 export interface Place {
   display_name: string;

@@ -10,6 +10,7 @@ export interface CreateProjectFormState {
   location: {
     lat: number;
     lng: number;
+    address?: string; // optional here
   } | null;
 }
 

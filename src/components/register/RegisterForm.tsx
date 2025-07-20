@@ -40,11 +40,26 @@ const RegisterForm: React.FC = () => {
   const handleGoogleRegister = async () => {
     setError(null);
     setLoading(true);
+
+    const popupTimeout = setTimeout(() => {
+      setLoading(false); // fallback in case of freeze
+    }, 3000);
+
     try {
       await signInWithPopup(auth, provider);
+      clearTimeout(popupTimeout);
       navigate("/completeProfile");
     } catch (err: any) {
-      setError(err.message || "Google sign-in failed.");
+      clearTimeout(popupTimeout);
+
+      if (
+        err.code === "auth/popup-closed-by-user" ||
+        err.code === "auth/cancelled-popup-request"
+      ) {
+        // Silent cancel — don't show error
+      } else {
+        setError(err.message || "Google sign-up failed.");
+      }
     } finally {
       setLoading(false);
     }
@@ -52,6 +67,8 @@ const RegisterForm: React.FC = () => {
 
   return (
     <div>
+      <RegisterErrorMessage message={error} />
+
       <RegisterGoogleButton
         onClick={handleGoogleRegister}
         disabled={loading}
@@ -74,8 +91,6 @@ const RegisterForm: React.FC = () => {
 
         <RegisterSubmitButton loading={loading} />
       </form>
-
-      <RegisterErrorMessage message={error} />
 
       <RegisterLinkToSignIn />
     </div>

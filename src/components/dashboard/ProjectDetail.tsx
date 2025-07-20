@@ -1,17 +1,9 @@
 // src/components/ProjectDetail.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, Timestamp } from "firebase/firestore";
 import { app } from "../../lib/firebase";
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl?: string;
-  memberCount: number;
-  roles: string[];
-}
+import type { Project } from "../../types/Project";
 
 const db = getFirestore(app);
 
@@ -43,6 +35,17 @@ const ProjectDetail: React.FC = () => {
   if (loading) return <p className="text-center mt-8">Loading project...</p>;
   if (!project) return <p className="text-center mt-8">Project not found.</p>;
 
+  const formatDate = (timestamp?: Timestamp | Date | null) => {
+    if (!timestamp) return "N/A";
+    if ("toDate" in timestamp && typeof timestamp.toDate === "function") {
+      return timestamp.toDate().toLocaleDateString();
+    }
+    if (timestamp instanceof Date) {
+      return timestamp.toLocaleDateString();
+    }
+    return "Invalid date";
+  };
+
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 mt-8">
       <button
@@ -65,6 +68,14 @@ const ProjectDetail: React.FC = () => {
       </p>
       <p>
         <strong>Roles:</strong> {project.roles.join(", ")}
+      </p>
+      {project.location && (
+        <p>
+          <strong>Location:</strong> {project.location.address ?? `${project.location.lat.toFixed(4)}, ${project.location.lng.toFixed(4)}`}
+        </p>
+      )}
+      <p>
+        <strong>Created At:</strong> {formatDate(project.createdAt)}
       </p>
     </div>
   );

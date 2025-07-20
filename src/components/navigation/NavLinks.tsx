@@ -10,14 +10,13 @@ interface NavLinksProps {
   profileButtonRef: React.RefObject<HTMLButtonElement | null>;
   handleLogout: () => void;
   isMobile?: boolean;
-  closeMenu?: () => void;  // NEW optional callback to close mobile menu
+  closeMenu?: () => void; // Optional callback to close mobile menu
 }
 
 const links = [
   { name: "Home", path: "/dashboard" },
   { name: "Create Project", path: "/create" },
   { name: "Map", path: "/map" },
-  { name: "Profile Form", path: "/form" },
   { name: "Public Feed", path: "/feed" },
   { name: "About", path: "/about" },
 ];
@@ -41,7 +40,6 @@ const NavLinks: React.FC<NavLinksProps> = ({
     );
   };
 
-  // Helper to handle link clicks, closing menu on mobile
   const handleLinkClick = () => {
     if (isMobile && closeMenu) {
       closeMenu();
@@ -55,7 +53,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
           <NavLink
             to={path}
             end
-            onClick={handleLinkClick}  // close mobile menu on click
+            onClick={handleLinkClick}
             className={({ isActive }) =>
               `cursor-pointer hover:underline ${
                 isActive ? "underline font-semibold" : ""
@@ -72,7 +70,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
           <button
             ref={profileButtonRef}
             onClick={(e) => {
-              e.stopPropagation();  // prevent bubbling and double toggle
+              e.stopPropagation();
               toggleProfileMenu();
             }}
             aria-label="Toggle profile menu"
@@ -93,7 +91,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
               <div className="flex justify-end">
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();  // STOP BUBBLING here
+                    e.stopPropagation();
                     toggleProfileMenu();
                   }}
                   aria-label="Close profile menu"
@@ -102,6 +100,18 @@ const NavLinks: React.FC<NavLinksProps> = ({
                   ×
                 </button>
               </div>
+
+              <NavLink
+                to={`/profile/${user.uid}`}
+                onClick={() => {
+                  toggleProfileMenu();
+                  if (isMobile && closeMenu) closeMenu();
+                }}
+                className="mt-2 block w-full text-left px-4 py-2 hover:bg-gray-200"
+              >
+                View Profile
+              </NavLink>
+
               <button
                 onClick={() => {
                   handleLogout();

@@ -1,4 +1,12 @@
 // src/types/Project.ts
+import { Timestamp } from "firebase/firestore";
+
+export interface Location {
+  lat: number;
+  lng: number;
+  address: string;
+}
+
 export interface Project {
   id?: string;
   title: string;
@@ -6,7 +14,8 @@ export interface Project {
   imageUrl?: string;
   memberCount: number;
   roles: string[];
-  createdAt?: any; // Firestore timestamp or Date
+  location?: Location | null;
+  createdAt?: Timestamp | Date | null;
 }
 
 export interface ProjectCardProps extends Project {}

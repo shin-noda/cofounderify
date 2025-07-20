@@ -11,6 +11,14 @@ const NotFound: React.FC = () => {
       <p className="text-xl text-gray-600 mb-6">
         Oops! The page you're looking for doesn't exist.
       </p>
+
+      {/* Logo image from /public/logo.png */}
+      <img
+        src="/logo.png"
+        alt="CoFounderify Logo"
+        className="mx-auto mb-6 w-32 h-32 object-contain"
+      />
+
       <button
         onClick={() => navigate("/")}
         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded"

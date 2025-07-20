@@ -21,6 +21,7 @@ import ProjectDetail from "./components/dashboard/ProjectDetail";
 import CookieConsent from "./components/cookie/CookieConsent";
 import PrivateRoute from "./components/privateRoute/PrivateRoute";
 import RegisterCompleteProfileForm from "./components/register/RegisterCompleteProfileForm";
+import UserProfile from "./pages/UserProfile";
 
 function App() {
   const navigate = useNavigate();
@@ -59,6 +60,8 @@ function App() {
 
             {/* Add complete profile route here */}
             <Route path="/completeProfile" element={<RegisterCompleteProfileForm />} />
+
+            <Route path="/profile/:uid" element={<UserProfile />} />
           </Route>
 
           {/* NotFound page */}

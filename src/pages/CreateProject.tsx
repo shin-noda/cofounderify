@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { app } from "../lib/firebase";
 
 import type { CreateProjectFormProps, CreateProjectFormState } from "../types/CreateProjectForm";
@@ -13,15 +14,18 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
     memberCount: 1,
     roles: [""],
     description: "",
-    imageFile: null,      // <-- include this!
+    imageFile: null,
     imageUrl: "",
     loading: false,
-    location: null,       // <-- include this!
+    location: null, // { lat: number, lng: number, address?: string } or null
   };
 
   const [formState, setFormState] = useState<CreateProjectFormState>(initialState);
 
-  const setField = <K extends keyof CreateProjectFormState>(field: K, value: CreateProjectFormState[K]) => {
+  const setField = <K extends keyof CreateProjectFormState>(
+    field: K,
+    value: CreateProjectFormState[K]
+  ) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -48,8 +52,25 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
     e.preventDefault();
     setField("loading", true);
 
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert("You must be signed in to create a project.");
+      setField("loading", false);
+      return;
+    }
+
     try {
       const imageUrl = formState.imageUrl || "";
+
+      const location = formState.location
+        ? {
+            lat: formState.location.lat,
+            lng: formState.location.lng,
+            address: formState.location.address ?? null,
+          }
+        : null;
 
       await addDoc(collection(db, "projects"), {
         title: formState.title,
@@ -57,13 +78,14 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
         roles: formState.roles,
         description: formState.description,
         imageUrl,
+        location,
+        ownerId: user.uid, // <-- add ownerId here!
         createdAt: serverTimestamp(),
       });
 
       alert("Project created successfully!");
 
-      setFormState(initialState);  // reset state with all required fields
-
+      setFormState(initialState); // reset state
       onSuccess();
     } catch (error) {
       console.error("Error adding project:", error);

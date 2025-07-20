@@ -38,11 +38,28 @@ const SignIn: React.FC = () => {
   const handleGoogleSignIn = async () => {
     setError(null);
     setLoading(true);
+
+    // Timeout fallback in case Firebase is slow
+    const popupTimeout = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
     try {
       await signInWithPopup(auth, provider);
+      clearTimeout(popupTimeout);
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Google sign-in failed.");
+      clearTimeout(popupTimeout);
+
+      if (
+        err.code === "auth/popup-closed-by-user" ||
+        err.code === "auth/cancelled-popup-request"
+      ) {
+        // Do nothing, user just closed the popup or clicked too fast
+        return;
+      } else {
+        setError(err.message || "Google sign-in failed.");
+      }
     } finally {
       setLoading(false);
     }

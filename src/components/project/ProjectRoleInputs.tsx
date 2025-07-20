@@ -10,7 +10,11 @@ const ProjectRoleInputs: React.FC<RoleInputsProps> = ({ roles, onRoleChange }) =
         key={idx}
         type="text"
         required
-        placeholder={`Role #${idx + 1} (e.g., backend, frontend, biz)`}
+        placeholder={
+          idx === 0
+            ? "Your Role (e.g., backend, frontend, biz)"
+            : `Role #${idx + 1} (e.g., backend, frontend, biz)`
+        }
         value={role}
         onChange={(e) => onRoleChange(idx, e.target.value)}
         className="w-full border rounded p-2 mt-1 mb-2"

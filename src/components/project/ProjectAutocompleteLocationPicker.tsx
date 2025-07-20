@@ -26,7 +26,7 @@ const ProjectAutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProp
   location,
   onChange,
 }) => {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(location?.address || "");
   const [suggestions, setSuggestions] = useState<Place[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +36,6 @@ const ProjectAutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProp
       return;
     }
 
-    // Debounce: wait 250ms after user stops typing before fetching
     const debounceTimeout = setTimeout(() => {
       const controller = new AbortController();
 
@@ -53,7 +52,6 @@ const ProjectAutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProp
       return () => controller.abort();
     }, 250);
 
-    // Clear the timeout if input changes before 500ms
     return () => clearTimeout(debounceTimeout);
   }, [input]);
 
@@ -88,8 +86,12 @@ const ProjectAutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProp
               key={i}
               className="p-2 cursor-pointer hover:bg-gray-200"
               onClick={() => {
-                const loc = { lat: parseFloat(place.lat), lng: parseFloat(place.lon) };
-                onChange(loc);
+                const selected = {
+                  lat: parseFloat(place.lat),
+                  lng: parseFloat(place.lon),
+                  address: place.display_name, // <-- fixed here
+                };
+                onChange(selected);
                 setInput(place.display_name);
                 setSuggestions([]);
               }}
@@ -102,7 +104,7 @@ const ProjectAutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProp
 
       <div className="h-48 w-full rounded border overflow-hidden">
         <MapContainer
-          center={location || [20, 0]}
+          center={location ? [location.lat, location.lng] : [20, 0]}
           zoom={location ? 12 : 2}
           scrollWheelZoom={false}
           className="h-full w-full"

@@ -6,4 +6,5 @@ export default defineConfig({
   plugins: [
     react(),
   ],
+  logLevel: 'info', // Set to 'info' to hide debug logs
 })
