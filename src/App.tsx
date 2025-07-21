@@ -16,7 +16,6 @@ import {
 
 import Navigation from "./components/navigation/Navigation";
 import Footer from "./components/footer/Footer";
-import ProjectMap from "./components/projectMap/ProjectMap";
 import ProjectDetail from "./components/dashboard/ProjectDetail";
 import CookieConsent from "./components/cookie/CookieConsent";
 import PrivateRoute from "./components/privateRoute/PrivateRoute";
@@ -33,8 +32,9 @@ function App() {
       <main className="flex-grow pt-20 pb-12 p-4 bg-gray-50">
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<Register />} /> {/* maybe change later */}
-          <Route path="/register" element={<Register />} /> {/* <-- Added this line */}
+          <Route path="/" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
@@ -44,7 +44,6 @@ function App() {
 
           {/* Protected routes */}
           <Route element={<PrivateRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route
               path="/create"
               element={
@@ -55,7 +54,6 @@ function App() {
                 />
               }
             />
-            <Route path="/map" element={<ProjectMap />} />
             <Route path="/project/:id" element={<ProjectDetail />} />
 
             {/* Add complete profile route here */}

@@ -12,6 +12,8 @@ export interface CreateProjectFormState {
     lng: number;
     address?: string; // optional here
   } | null;
+  startDateTime: string;
+  endDateTime: string;
 }
 
 export interface ProjectFormProps {
@@ -23,6 +25,8 @@ export interface ProjectFormProps {
   handleRoleChange: (index: number, value: string) => void;
   handleMemberCountChange: (count: number) => void;
   handleSubmit: (e: React.FormEvent) => void;
+  locationValiditySetter?: (valid: boolean) => void;
+  dateRangeValiditySetter?: (valid: boolean) => void;
 }
 
 export interface CreateProjectFormProps {

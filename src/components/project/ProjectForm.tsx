@@ -9,6 +9,7 @@ import {
   ProjectDescriptionInput,
   ProjectSubmitButton,
 } from ".";
+import ProjectDateRangePicker from "./ProjectDateRangePicker";
 import type { ProjectFormProps } from "../../types/CreateProjectForm";
 
 const ProjectForm: React.FC<ProjectFormProps> = ({
@@ -17,45 +18,62 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   handleRoleChange,
   handleMemberCountChange,
   handleSubmit,
-}) => (
-  <div className="max-w-md mx-auto mt-8 text-left">
-    <h2 className="text-2xl font-bold mb-4">Create Your Project</h2>
-    
-    <form onSubmit={handleSubmit} className="space-y-4">
-
-      <ProjectTitleInput
-        value={formState.title}
-        onChange={(val) => setField("title", val)}
-      />
+  locationValiditySetter,
+  dateRangeValiditySetter,
+}) => {
+  return (
+    <div className="max-w-md mx-auto mt-8 text-left">
+      <h2 className="text-2xl font-bold mb-4">Create Your Project</h2>
       
-      <ProjectMemberCountInput
-        value={formState.memberCount}
-        onChange={handleMemberCountChange}
-      />
+      <form onSubmit={handleSubmit} className="space-y-4">
 
-      <ProjectRoleInputs
-        roles={formState.roles}
-        onRoleChange={handleRoleChange}
-      />
+        <ProjectTitleInput
+          value={formState.title}
+          onChange={(val) => setField("title", val)}
+        />
+        
+        <ProjectMemberCountInput
+          value={formState.memberCount}
+          onChange={handleMemberCountChange}
+        />
 
-      <ProjectDescriptionInput
-        value={formState.description}
-        onChange={(val) => setField("description", val)}
-      />
+        <ProjectRoleInputs
+          roles={formState.roles}
+          onRoleChange={handleRoleChange}
+        />
 
-      <ProjectImageUploader onFileChange={(file) => setField("imageUrl", file || "")} />
+        <ProjectDescriptionInput
+          value={formState.description}
+          onChange={(val) => setField("description", val)}
+        />
 
-      <ProjectAutocompleteLocationPicker
-        location={formState.location}
-        onChange={(loc) => setField("location", loc)}
-      />
+        <ProjectImageUploader
+          onFileChange={(file) => setField("imageUrl", file || "")}
+        />
 
-      <ProjectSubmitButton
-        loading={formState.loading} 
-      />
+        <ProjectAutocompleteLocationPicker
+          location={formState.location}
+          onChange={(loc) => setField("location", loc)}
+          onValidChange={locationValiditySetter}
+        />
 
-    </form>
-  </div>
-);
+        <ProjectDateRangePicker
+          startDateTime={formState.startDateTime}
+          endDateTime={formState.endDateTime}
+          onChange={(start, end, isValid) => {
+            setField("startDateTime", start);
+            setField("endDateTime", end);
+            if (dateRangeValiditySetter) dateRangeValiditySetter(isValid);
+          }}
+        />
+
+        <ProjectSubmitButton
+          loading={formState.loading}
+        />
+
+      </form>
+    </div>
+  );
+};
 
 export default ProjectForm;
