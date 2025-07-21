@@ -20,7 +20,7 @@ const NotFound: React.FC = () => {
       />
 
       <button
-        onClick={() => navigate("/")}
+        onClick={() => navigate("/dashboard")}
         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded"
       >
         Go Back Home

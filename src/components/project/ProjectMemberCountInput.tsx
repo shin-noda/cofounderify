@@ -27,7 +27,7 @@ const MemberCountInput: React.FC<MemberCountInputProps> = ({ value, onChange }) 
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700">
-        Number of Members (including you)
+        Number of Team Members (including you)
       </label>
       <input
         type="number"

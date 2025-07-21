@@ -14,9 +14,7 @@ interface NavLinksProps {
 }
 
 const links = [
-  { name: "Home", path: "/dashboard" },
   { name: "Create Project", path: "/create" },
-  { name: "Map", path: "/map" },
   { name: "Public Feed", path: "/feed" },
   { name: "About", path: "/about" },
 ];

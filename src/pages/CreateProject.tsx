@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { app } from "../lib/firebase";
@@ -17,26 +17,31 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
     imageFile: null,
     imageUrl: "",
     loading: false,
-    location: null, // { lat: number, lng: number, address?: string } or null
+    location: null,
+    startDateTime: "",
+    endDateTime: "",
   };
 
   const [formState, setFormState] = useState<CreateProjectFormState>(initialState);
+  const [isValidLocation, setIsValidLocation] = useState(false);
+  const [isValidDateRange, setIsValidDateRange] = useState(false);
 
-  const setField = <K extends keyof CreateProjectFormState>(
+  const setField = useCallback(<K extends keyof CreateProjectFormState>(
     field: K,
     value: CreateProjectFormState[K]
   ) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const handleRoleChange = (index: number, value: string) => {
-    const newRoles = [...formState.roles];
-    newRoles[index] = value;
-    setField("roles", newRoles);
-  };
+  const handleRoleChange = useCallback((index: number, value: string) => {
+    setFormState((prev) => {
+      const newRoles = [...prev.roles];
+      newRoles[index] = value;
+      return { ...prev, roles: newRoles };
+    });
+  }, []);
 
-  const handleMemberCountChange = (count: number) => {
-    setField("memberCount", count);
+  const handleMemberCountChange = useCallback((count: number) => {
     setFormState((prev) => {
       const newRoles = [...prev.roles];
       if (count > newRoles.length) {
@@ -46,10 +51,32 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
       }
       return { ...prev, roles: newRoles, memberCount: count };
     });
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleDateRangeChange = useCallback((start: string, end: string, isValid: boolean) => {
+    setField("startDateTime", start);
+    setField("endDateTime", end);
+    setIsValidDateRange(isValid);
+  }, [setField]);
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formState.location || !isValidLocation) {
+      alert("Please select a valid location from the suggestions.");
+      return;
+    }
+
+    if (!isValidDateRange) {
+      alert(
+        "Please select a valid event date and time range.\n" +
+        "- Start date/time cannot be in the past.\n" +
+        "- End date/time must be after start date/time.\n" +
+        "- Duration must be at least 4 hours."
+      );
+      return;
+    }
+
     setField("loading", true);
 
     const auth = getAuth();
@@ -79,20 +106,32 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
         description: formState.description,
         imageUrl,
         location,
-        ownerId: user.uid, // <-- add ownerId here!
+        startDateTime: formState.startDateTime,
+        endDateTime: formState.endDateTime,
+        ownerId: user.uid,
         createdAt: serverTimestamp(),
       });
 
       alert("Project created successfully!");
 
-      setFormState(initialState); // reset state
+      setFormState(initialState);
+      setIsValidLocation(false);
+      setIsValidDateRange(false);
       onSuccess();
     } catch (error) {
       console.error("Error adding project:", error);
       alert("Failed to create project. Try again.");
       setField("loading", false);
     }
-  };
+  }, [formState, isValidLocation, isValidDateRange, onSuccess, setField]);
+
+  const locationValiditySetter = useCallback((valid: boolean) => {
+    setIsValidLocation(valid);
+  }, []);
+
+  const dateRangeValiditySetter = useCallback((valid: boolean) => {
+    setIsValidDateRange(valid);
+  }, []);
 
   return (
     <ProjectForm
@@ -101,6 +140,8 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
       handleRoleChange={handleRoleChange}
       handleMemberCountChange={handleMemberCountChange}
       handleSubmit={handleSubmit}
+      locationValiditySetter={locationValiditySetter}
+      dateRangeValiditySetter={dateRangeValiditySetter}
     />
   );
 };

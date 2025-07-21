@@ -1,82 +1,191 @@
-// src/components/ProjectDetail.tsx
+// src/components/Project/ProjectDetail.tsx
+
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { getFirestore, doc, getDoc, Timestamp } from "firebase/firestore";
+import { useParams } from "react-router-dom";
+import {
+  getFirestore,
+  doc,
+  onSnapshot,
+  updateDoc,
+  Timestamp,
+  arrayUnion,
+} from "firebase/firestore";
 import { app } from "../../lib/firebase";
+import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import type { Project } from "../../types/Project";
+import ProjectOverlayConfirmation from "./ProjectOverlayConfirmation";
+import ProjectInfoDisplay from "./ProjectInfoDisplay";
+import ProjectBackButton from "./ProjectBackButton";
+import ProjectRequestMessageSent from "./ProjectRequestMessageSent";
+import ProjectRequestsList from "./ProjectRequestsList";
+import ProjectRolesButtons from "./ProjectRolesButtons";
 
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-
+  const [user, setUser] = useState<User | null>(() => auth.currentUser);
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestSentRole, setRequestSentRole] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasUserRequested, setHasUserRequested] = useState(false);
 
   useEffect(() => {
-    async function fetchProject() {
-      if (!id) return;
-      setLoading(true);
-      const docRef = doc(db, "projects", id);
-      const docSnap = await getDoc(docRef);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
+  useEffect(() => {
+    if (!id) {
+      console.error("Project ID is missing.");
+      setProject(null);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const docRef = doc(db, "projects", id);
+
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
-        setProject({ ...(docSnap.data() as Project), id: docSnap.id });
+        const data = docSnap.data() as Project & { requests?: any[] };
+        setProject({ ...data, id: docSnap.id });
+
+        // --- ADDED DEBUG LOGS HERE ---
+        // console.log("User:", user);
+        // console.log("Project requests:", data.requests);
+
+        if (user) {
+          const alreadyRequested = (data.requests ?? []).some(
+            (r) => r.uid === user.uid
+          );
+          // console.log("Already requested?", alreadyRequested);
+
+          if (alreadyRequested) {
+            const matched = (data.requests ?? []).find(
+              (r) => r.uid === user.uid
+            );
+            // console.log("Matched request:", matched);
+            setRequestSentRole(matched?.role ?? null);
+          } else {
+            setRequestSentRole(null);
+          }
+          setHasUserRequested(alreadyRequested);
+        } else {
+          setHasUserRequested(false);
+          setRequestSentRole(null);
+        }
       } else {
         setProject(null);
       }
       setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [id, user]);
+
+  const handleRequestClick = (role: string) => {
+    if (!user) {
+      alert("Please sign in to join a project.");
+      return;
+    }
+    setSelectedRole(role);
+    setRequestMessage("");
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmRequest = async () => {
+    if (!project?.id || !selectedRole || !user || hasUserRequested) return;
+
+    const request = {
+      uid: user.uid,
+      displayName: user.displayName ?? "Anonymous",
+      role: selectedRole,
+      message: requestMessage,
+      timestamp: Timestamp.now(),
+    };
+
+    const docRef = doc(db, "projects", project.id);
+    await updateDoc(docRef, {
+      requests: arrayUnion(request),
+    });
+
+    setRequestSentRole(selectedRole);
+    setHasUserRequested(true);
+    setIsModalOpen(false);
+  };
+
+  const formatDateTime = (value?: Timestamp | Date | string | null) => {
+    if (!value) return "N/A";
+    const date =
+      typeof value === "string"
+        ? new Date(value)
+        : value instanceof Timestamp
+        ? value.toDate()
+        : value;
+
+    const now = new Date();
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    };
+
+    if (date.getFullYear() !== now.getFullYear()) {
+      options.year = "numeric";
     }
 
-    fetchProject();
-  }, [id]);
+    return date.toLocaleString(undefined, options).replace(", ", " • ");
+  };
 
   if (loading) return <p className="text-center mt-8">Loading project...</p>;
   if (!project) return <p className="text-center mt-8">Project not found.</p>;
 
-  const formatDate = (timestamp?: Timestamp | Date | null) => {
-    if (!timestamp) return "N/A";
-    if ("toDate" in timestamp && typeof timestamp.toDate === "function") {
-      return timestamp.toDate().toLocaleDateString();
-    }
-    if (timestamp instanceof Date) {
-      return timestamp.toLocaleDateString();
-    }
-    return "Invalid date";
-  };
+  const isOwner = user?.uid === project.ownerId;
+  const takenRoles = project.requests?.map((r) => r.role) ?? [];
+  const yourRole = isOwner ? project.roles[0] : requestSentRole;
+
 
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 mt-8">
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-4 text-blue-600 hover:underline"
-      >
-        &larr; Back
-      </button>
-      <h2 className="text-2xl font-bold mb-4">{project.title}</h2>
-      {project.imageUrl && (
-        <img
-          src={project.imageUrl}
-          alt={project.title}
-          className="w-full h-48 object-cover rounded mb-4"
+      <ProjectBackButton />
+
+      <ProjectInfoDisplay project={project} formatDateTime={formatDateTime} />
+
+      <ProjectRolesButtons
+        roles={project.roles}
+        yourRole={yourRole}
+        isOwner={isOwner}
+        takenRoles={takenRoles}
+        onRequestClick={handleRequestClick}
+      />
+
+      {isOwner && project.id && project.requests && (
+        <ProjectRequestsList projectId={project.id} requests={project.requests} />
+      )}
+
+      {isModalOpen && (
+        <ProjectOverlayConfirmation
+          selectedRole={selectedRole}
+          requestMessage={requestMessage}
+          onRequestMessageChange={setRequestMessage}
+          onCancel={() => setIsModalOpen(false)}
+          onConfirm={handleConfirmRequest}
+          disabled={hasUserRequested}
         />
       )}
-      <p className="mb-4">{project.description}</p>
-      <p>
-        <strong>Members:</strong> {project.memberCount}
-      </p>
-      <p>
-        <strong>Roles:</strong> {project.roles.join(", ")}
-      </p>
-      {project.location && (
-        <p>
-          <strong>Location:</strong> {project.location.address ?? `${project.location.lat.toFixed(4)}, ${project.location.lng.toFixed(4)}`}
-        </p>
+
+      {!isOwner && hasUserRequested && (
+        <ProjectRequestMessageSent role={requestSentRole} />
       )}
-      <p>
-        <strong>Created At:</strong> {formatDate(project.createdAt)}
-      </p>
     </div>
   );
 };

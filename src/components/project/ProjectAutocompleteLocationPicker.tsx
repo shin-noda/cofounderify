@@ -12,6 +12,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+// Fly map to location changes
 const FlyToLocation: React.FC<{ location: Location | null }> = ({ location }) => {
   const map = useMap();
   useEffect(() => {
@@ -22,23 +23,37 @@ const FlyToLocation: React.FC<{ location: Location | null }> = ({ location }) =>
   return null;
 };
 
-const ProjectAutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProps> = ({
+interface ExtendedAutocompleteLocationPickerProps extends AutocompleteLocationPickerProps {
+  onValidChange?: (isValid: boolean) => void;
+}
+
+const ProjectAutocompleteLocationPicker: React.FC<ExtendedAutocompleteLocationPickerProps> = ({
   location,
   onChange,
+  onValidChange,
 }) => {
   const [input, setInput] = useState(location?.address || "");
   const [suggestions, setSuggestions] = useState<Place[]>([]);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isValidLocation, setIsValidLocation] = useState(!!location);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Notify parent when validity changes
+  useEffect(() => {
+    if (onValidChange) {
+      onValidChange(isValidLocation);
+    }
+  }, [isValidLocation, onValidChange]);
+
+  // Fetch suggestions with debounce
   useEffect(() => {
     if (input.length < 3) {
       setSuggestions([]);
       return;
     }
 
-    const debounceTimeout = setTimeout(() => {
-      const controller = new AbortController();
-
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
       fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           input
@@ -47,12 +62,13 @@ const ProjectAutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProp
       )
         .then((res) => res.json())
         .then((data: Place[]) => setSuggestions(data))
-        .catch(() => {});
+        .catch(() => {}); // ignore errors silently
+    }, 300);
 
-      return () => controller.abort();
-    }, 250);
-
-    return () => clearTimeout(debounceTimeout);
+    return () => {
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
   }, [input]);
 
   // Close suggestions on outside click
@@ -62,12 +78,33 @@ const ProjectAutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProp
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
       ) {
+        setIsFocused(false);
         setSuggestions([]);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // When user types manually, invalidate location until they select from suggestions
+  const handleInputChange = (value: string) => {
+    setInput(value);
+    setIsValidLocation(false);
+  };
+
+  // When user clicks a suggestion, set location and mark as valid
+  const handleSelectSuggestion = (place: Place) => {
+    const selected = {
+      lat: parseFloat(place.lat),
+      lng: parseFloat(place.lon),
+      address: place.display_name,
+    };
+    onChange(selected);
+    setInput(place.display_name);
+    setSuggestions([]);
+    setIsFocused(false);
+    setIsValidLocation(true);
+  };
 
   return (
     <div ref={containerRef} className="space-y-2">
@@ -76,25 +113,17 @@ const ProjectAutocompleteLocationPicker: React.FC<AutocompleteLocationPickerProp
         placeholder="Search location..."
         className="w-full border rounded p-2"
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onFocus={() => setIsFocused(true)}
+        onChange={(e) => handleInputChange(e.target.value)}
       />
 
-      {suggestions.length > 0 && (
-        <ul className="border rounded bg-white max-h-40 overflow-y-auto shadow-md">
+      {isFocused && suggestions.length > 0 && (
+        <ul className="border rounded bg-white max-h-40 overflow-y-auto shadow-md z-10 relative">
           {suggestions.map((place, i) => (
             <li
               key={i}
               className="p-2 cursor-pointer hover:bg-gray-200"
-              onClick={() => {
-                const selected = {
-                  lat: parseFloat(place.lat),
-                  lng: parseFloat(place.lon),
-                  address: place.display_name, // <-- fixed here
-                };
-                onChange(selected);
-                setInput(place.display_name);
-                setSuggestions([]);
-              }}
+              onClick={() => handleSelectSuggestion(place)}
             >
               {place.display_name}
             </li>
