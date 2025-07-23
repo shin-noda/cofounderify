@@ -7,6 +7,21 @@ export interface Location {
   address: string;
 }
 
+export interface Member {
+  uid: string;
+  displayName: string;
+  role: string;
+  joinedAt: Timestamp | Date; // Use Timestamp or Date depending on what you store
+}
+
+export interface Request {
+  uid: string;
+  displayName: string;
+  role: string;
+  message: string;
+  timestamp: Timestamp;
+}
+
 export interface Project {
   id?: string;
   title: string;
@@ -19,13 +34,8 @@ export interface Project {
   startDateTime?: string | Timestamp | null;
   endDateTime?: string | Timestamp | null;
   ownerId: string;
-  requests?: {
-    uid: string;
-    displayName: string;
-    role: string;
-    message: string;
-    timestamp: Timestamp;
-  }[];
+  requests?: Request[];
+  members?: Member[];
 }
 
 export interface ProjectCardProps extends Project {}

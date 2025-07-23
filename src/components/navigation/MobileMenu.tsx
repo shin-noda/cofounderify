@@ -7,7 +7,7 @@ type MobileMenuProps = {
   isOpen: boolean;
   closeMenu: () => void;
   profileMenuOpen: boolean;
-  toggleProfileMenu: () => void;
+  toggleProfileMenu: (e?: React.MouseEvent) => void;
   profileMenuRef: React.RefObject<HTMLDivElement | null>;
   profileButtonRef: React.RefObject<HTMLButtonElement | null>;
   handleLogout: () => void;

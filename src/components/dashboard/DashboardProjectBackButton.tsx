@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const ProjectBackButton: React.FC = () => {
+const DashboardProjectBackButton: React.FC = () => {
   const navigate = useNavigate();
 
   return (
@@ -15,4 +15,4 @@ const ProjectBackButton: React.FC = () => {
   );
 };
 
-export default ProjectBackButton;
+export default DashboardProjectBackButton;

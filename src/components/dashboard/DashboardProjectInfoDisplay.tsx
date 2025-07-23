@@ -8,7 +8,7 @@ interface Props {
   formatDateTime: (value?: Date | string | null) => string;
 }
 
-const ProjectInfoDisplay: React.FC<Props> = ({ project, formatDateTime }) => {
+const DashboardProjectInfoDisplay: React.FC<Props> = ({ project, formatDateTime }) => {
   // Helper to convert Timestamp to Date or pass through
   const normalizeDateTime = (value?: string | Date | Timestamp | null) => {
     if (!value) return null;
@@ -59,4 +59,4 @@ const ProjectInfoDisplay: React.FC<Props> = ({ project, formatDateTime }) => {
   );
 };
 
-export default ProjectInfoDisplay;
+export default DashboardProjectInfoDisplay;

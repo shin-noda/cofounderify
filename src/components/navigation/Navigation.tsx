@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import NavLinks from "./NavLinks";
 import MobileMenu from "./MobileMenu";
+import { useFilter } from "../../context/FilterContext";
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,44 +16,37 @@ const Navigation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { setSearchQuery, setFilterRange } = useFilter();
+
+  // Listen for auth state changes
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
+    const unsubscribe = onAuthStateChanged(auth, setUser);
     return unsubscribe;
   }, []);
 
-  const toggleMenu = () => setIsOpen((open) => !open);
-  const closeMenu = () => setIsOpen(false);
-
-  const toggleProfileMenu = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setProfileMenuOpen((prev) => !prev);
-  };
-
+  // Close profile menu on outside click
   useEffect(() => {
     if (!profileMenuOpen) return;
 
-    function handleClickOutside(event: MouseEvent) {
-      const clickedTarget = event.target as Node;
-      const isInsideMenu = profileMenuRef.current?.contains(clickedTarget);
-      const isInsideButton = profileButtonRef.current?.contains(clickedTarget);
-
-      if (!isInsideMenu && !isInsideButton) {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        !profileMenuRef.current?.contains(target) &&
+        !profileButtonRef.current?.contains(target)
+      ) {
         setProfileMenuOpen(false);
       }
-    }
+    };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileMenuOpen]);
 
+  // Close menus on route change
   useEffect(() => {
     setProfileMenuOpen(false);
-    closeMenu();
+    setIsOpen(false);
   }, [location.pathname]);
 
   const handleLogout = async () => {
@@ -65,21 +59,34 @@ const Navigation: React.FC = () => {
     }
   };
 
+  // Reset filters and navigate to dashboard on logo click
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setSearchQuery("");
+    setFilterRange(null);
+    navigate("/dashboard");
+  };
+
+  // Toggle profile menu handler with optional event param
+  const toggleProfileMenu = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setProfileMenuOpen((open) => !open);
+  };
+
   return (
     <nav className="w-full bg-black text-white fixed top-0 left-0 z-50 shadow-md">
       <div className="relative w-full flex items-center justify-between py-4 px-6">
-        {/* Logo absolutely positioned left but relative to this container */}
-        <NavLink
-          to="/dashboard"
-          className="font-bold text-xl absolute left-6 top-1/2 transform -translate-y-1/2"
-          end
+        {/* Logo as a styled link with click handler */}
+        <a
+          href="/dashboard"
+          onClick={handleLogoClick}
+          className="font-bold text-xl absolute left-6 top-1/2 transform -translate-y-1/2 cursor-pointer select-none"
+          aria-label="Go to dashboard"
         >
           CoFounderify
-        </NavLink>
+        </a>
 
-        {/* Nav links and hamburger: stretch full width, pushed right */}
         <div className="flex items-center justify-end flex-grow ml-24">
-          {/* Desktop nav */}
           <ul className="hidden md:flex space-x-6 items-center">
             <NavLinks
               user={user}
@@ -91,15 +98,15 @@ const Navigation: React.FC = () => {
             />
           </ul>
 
-          {/* Mobile hamburger */}
           <button
             ref={toggleButtonRef}
-            className="md:hidden text-2xl focus:outline-none ml-4"
+            className="md:hidden text-2xl focus:outline-none ml-4 select-none"
             onClick={(e) => {
               e.stopPropagation();
-              toggleMenu();
+              setIsOpen((open) => !open);
             }}
             aria-label="Toggle menu"
+            type="button"
           >
             {isOpen ? "×" : "≡"}
           </button>
@@ -111,7 +118,7 @@ const Navigation: React.FC = () => {
           <MobileMenu
             user={user}
             isOpen={isOpen}
-            closeMenu={closeMenu}
+            closeMenu={() => setIsOpen(false)}
             profileMenuOpen={profileMenuOpen}
             toggleProfileMenu={toggleProfileMenu}
             profileMenuRef={profileMenuRef}
