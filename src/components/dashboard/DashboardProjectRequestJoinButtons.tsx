@@ -7,7 +7,7 @@ interface Props {
   disabled: boolean;
 }
 
-const ProjectRequestJoinButtons: React.FC<Props> = ({
+const DashboardProjectRequestJoinButtons: React.FC<Props> = ({
   roles,
   onRequestClick,
   disabled,
@@ -35,4 +35,4 @@ const ProjectRequestJoinButtons: React.FC<Props> = ({
   );
 };
 
-export default ProjectRequestJoinButtons;
+export default DashboardProjectRequestJoinButtons;

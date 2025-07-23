@@ -5,7 +5,7 @@ interface Props {
   role: string | null;
 }
 
-const ProjectRequestMessageSent: React.FC<Props> = ({ role }) => {
+const DashboardProjectRequestMessageSent: React.FC<Props> = ({ role }) => {
   return (
     <div className="mt-6 text-center text-blue-600 text-lg font-semibold">
       📨 Request sent for the role of{" "}
@@ -14,4 +14,4 @@ const ProjectRequestMessageSent: React.FC<Props> = ({ role }) => {
   );
 };
 
-export default ProjectRequestMessageSent;
+export default DashboardProjectRequestMessageSent;

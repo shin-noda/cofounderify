@@ -10,7 +10,7 @@ interface ProjectOverlayConfirmationProps {
   disabled: boolean;
 }
 
-const ProjectOverlayConfirmation: React.FC<ProjectOverlayConfirmationProps> = ({
+const DashboardProjectOverlayConfirmation: React.FC<ProjectOverlayConfirmationProps> = ({
   selectedRole,
   requestMessage,
   onRequestMessageChange,
@@ -54,4 +54,4 @@ const ProjectOverlayConfirmation: React.FC<ProjectOverlayConfirmationProps> = ({
   );
 };
 
-export default ProjectOverlayConfirmation;
+export default DashboardProjectOverlayConfirmation;

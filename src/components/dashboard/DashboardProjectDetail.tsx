@@ -12,18 +12,18 @@ import {
 } from "firebase/firestore";
 import { app } from "../../lib/firebase";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
-import type { Project } from "../../types/Project";
-import ProjectOverlayConfirmation from "./ProjectOverlayConfirmation";
-import ProjectInfoDisplay from "./ProjectInfoDisplay";
-import ProjectBackButton from "./ProjectBackButton";
-import ProjectRequestMessageSent from "./ProjectRequestMessageSent";
-import ProjectRequestsList from "./ProjectRequestsList";
-import ProjectRolesButtons from "./ProjectRolesButtons";
+import type { Project, Request, Member } from "../../types/Project";
+import DashboardProjectOverlayConfirmation from "./DashboardProjectOverlayConfirmation";
+import DashboardProjectInfoDisplay from "./DashboardProjectInfoDisplay";
+import DashboardProjectBackButton from "./DashboardProjectBackButton";
+import DashboardProjectRequestMessageSent from "./DashboardProjectRequestMessageSent";
+import DashboardProjectRequestsList from "./DashboardProjectRequestsList";
+import DashboardProjectRolesButtons from "./DashboaredProjectRolesButtons";
 
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-const ProjectDetail: React.FC = () => {
+const DashboardProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [user, setUser] = useState<User | null>(() => auth.currentUser);
   const [project, setProject] = useState<Project | null>(null);
@@ -34,6 +34,7 @@ const ProjectDetail: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasUserRequested, setHasUserRequested] = useState(false);
 
+  // Track auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
@@ -41,6 +42,7 @@ const ProjectDetail: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
+  // Load project by ID and track updates
   useEffect(() => {
     if (!id) {
       console.error("Project ID is missing.");
@@ -53,37 +55,34 @@ const ProjectDetail: React.FC = () => {
     const docRef = doc(db, "projects", id);
 
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data() as Project & { requests?: any[] };
-        setProject({ ...data, id: docSnap.id });
-
-        // --- ADDED DEBUG LOGS HERE ---
-        // console.log("User:", user);
-        // console.log("Project requests:", data.requests);
-
-        if (user) {
-          const alreadyRequested = (data.requests ?? []).some(
-            (r) => r.uid === user.uid
-          );
-          // console.log("Already requested?", alreadyRequested);
-
-          if (alreadyRequested) {
-            const matched = (data.requests ?? []).find(
-              (r) => r.uid === user.uid
-            );
-            // console.log("Matched request:", matched);
-            setRequestSentRole(matched?.role ?? null);
-          } else {
-            setRequestSentRole(null);
-          }
-          setHasUserRequested(alreadyRequested);
-        } else {
-          setHasUserRequested(false);
-          setRequestSentRole(null);
-        }
-      } else {
+      if (!docSnap.exists()) {
         setProject(null);
+        setLoading(false);
+        return;
       }
+
+      const data = docSnap.data() as Project;
+      const requests: Request[] = data.requests ?? [];
+      const members: Member[] = data.members ?? [];
+
+      const fullProject: Project = {
+        ...data,
+        id: docSnap.id,
+        requests,
+        members,
+      };
+
+      setProject(fullProject);
+
+      if (user) {
+        const existingRequest = requests.find((r) => r.uid === user.uid);
+        setHasUserRequested(!!existingRequest);
+        setRequestSentRole(existingRequest?.role ?? null);
+      } else {
+        setHasUserRequested(false);
+        setRequestSentRole(null);
+      }
+
       setLoading(false);
     });
 
@@ -95,6 +94,7 @@ const ProjectDetail: React.FC = () => {
       alert("Please sign in to join a project.");
       return;
     }
+
     setSelectedRole(role);
     setRequestMessage("");
     setIsModalOpen(true);
@@ -103,7 +103,7 @@ const ProjectDetail: React.FC = () => {
   const handleConfirmRequest = async () => {
     if (!project?.id || !selectedRole || !user || hasUserRequested) return;
 
-    const request = {
+    const request: Request = {
       uid: user.uid,
       displayName: user.displayName ?? "Anonymous",
       role: selectedRole,
@@ -150,30 +150,45 @@ const ProjectDetail: React.FC = () => {
   if (!project) return <p className="text-center mt-8">Project not found.</p>;
 
   const isOwner = user?.uid === project.ownerId;
-  const takenRoles = project.requests?.map((r) => r.role) ?? [];
-  const yourRole = isOwner ? project.roles[0] : requestSentRole;
 
+  const pendingRoles = project.requests?.map((r) => r.role) ?? [];
+  const approvedRoles = project.members?.map((m) => m.role) ?? [];
+  const takenRoles = isOwner
+    ? approvedRoles
+    : [...new Set([...pendingRoles, ...approvedRoles])];
+
+  const userMember = project.members?.find((m) => m.uid === user?.uid);
+  const yourRole = isOwner
+    ? project.roles[0]
+    : userMember?.role ?? requestSentRole;
+  const userStatus = userMember
+    ? "approved"
+    : hasUserRequested
+    ? "pending"
+    : "none";
 
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 mt-8">
-      <ProjectBackButton />
+      <DashboardProjectBackButton />
 
-      <ProjectInfoDisplay project={project} formatDateTime={formatDateTime} />
+      <DashboardProjectInfoDisplay project={project} formatDateTime={formatDateTime} />
 
-      <ProjectRolesButtons
+      <DashboardProjectRolesButtons
+        project={project}
         roles={project.roles}
         yourRole={yourRole}
+        userStatus={userStatus}
         isOwner={isOwner}
         takenRoles={takenRoles}
         onRequestClick={handleRequestClick}
       />
 
       {isOwner && project.id && project.requests && (
-        <ProjectRequestsList projectId={project.id} requests={project.requests} />
+        <DashboardProjectRequestsList projectId={project.id} requests={project.requests} />
       )}
 
       {isModalOpen && (
-        <ProjectOverlayConfirmation
+        <DashboardProjectOverlayConfirmation
           selectedRole={selectedRole}
           requestMessage={requestMessage}
           onRequestMessageChange={setRequestMessage}
@@ -184,10 +199,10 @@ const ProjectDetail: React.FC = () => {
       )}
 
       {!isOwner && hasUserRequested && (
-        <ProjectRequestMessageSent role={requestSentRole} />
+        <DashboardProjectRequestMessageSent role={requestSentRole} />
       )}
     </div>
   );
 };
 
-export default ProjectDetail;
+export default DashboardProjectDetail;

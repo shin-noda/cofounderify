@@ -7,7 +7,7 @@ interface Props {
   onReject: (requestId: string) => void;
 }
 
-const ProjectApproveRejectButtons: React.FC<Props> = ({
+const DashboardProjectApproveRejectButtons: React.FC<Props> = ({
   requestId,
   onApprove,
   onReject,
@@ -30,4 +30,4 @@ const ProjectApproveRejectButtons: React.FC<Props> = ({
   );
 };
 
-export default ProjectApproveRejectButtons;
+export default DashboardProjectApproveRejectButtons;

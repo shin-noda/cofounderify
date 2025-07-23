@@ -1,8 +1,8 @@
 // src/components/ProjectRequestsList.tsx
 import React from "react";
-import { doc, updateDoc, arrayRemove, arrayUnion, getFirestore } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, getFirestore } from "firebase/firestore";
 import { app } from "../../lib/firebase";
-import ProjectApproveRejectButtons from "./ProjectApproveRejectButtons";
+import DashboardProjectApproveRejectButtons from "./DashboardProjectApproveRejectButtons";
 
 interface FirebaseRequest {
   uid: string;
@@ -17,7 +17,7 @@ interface Props {
   requests: FirebaseRequest[];
 }
 
-const ProjectRequestsList: React.FC<Props> = ({ projectId, requests }) => {
+const DashboardProjectRequestsList: React.FC<Props> = ({ projectId, requests }) => {
   const db = getFirestore(app);
 
   const handleApprove = async (uid: string) => {
@@ -26,10 +26,11 @@ const ProjectRequestsList: React.FC<Props> = ({ projectId, requests }) => {
     if (!request) return;
 
     try {
+      // Filter out approved request
+      const updatedRequests = requests.filter((r) => r.uid !== uid);
+
       await updateDoc(projectRef, {
-        // Remove from requests
-        requests: arrayRemove(request),
-        // Add to members
+        requests: updatedRequests,
         members: arrayUnion({
           uid: request.uid,
           displayName: request.displayName,
@@ -45,13 +46,12 @@ const ProjectRequestsList: React.FC<Props> = ({ projectId, requests }) => {
 
   const handleReject = async (uid: string) => {
     const projectRef = doc(db, "projects", projectId);
-    const request = requests.find((r) => r.uid === uid);
-    if (!request) return;
+    // Filter out rejected request
+    const updatedRequests = requests.filter((r) => r.uid !== uid);
 
     try {
       await updateDoc(projectRef, {
-        // Just remove from requests
-        requests: arrayRemove(request),
+        requests: updatedRequests,
       });
       console.log("Rejected:", uid);
     } catch (error) {
@@ -75,7 +75,7 @@ const ProjectRequestsList: React.FC<Props> = ({ projectId, requests }) => {
               <strong>Message:</strong> {req.message}
             </p>
 
-            <ProjectApproveRejectButtons
+            <DashboardProjectApproveRejectButtons
               requestId={req.uid}
               onApprove={handleApprove}
               onReject={handleReject}
@@ -87,4 +87,4 @@ const ProjectRequestsList: React.FC<Props> = ({ projectId, requests }) => {
   );
 };
 
-export default ProjectRequestsList;
+export default DashboardProjectRequestsList;

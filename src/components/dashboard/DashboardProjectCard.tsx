@@ -3,7 +3,7 @@ import React from "react";
 import { ProjectImage, ProjectInfo } from "../project";
 import type { ProjectCardProps } from "../../types/ProjectCard";
 
-const ProjectCard: React.FC<ProjectCardProps> = ({
+const DashboardProjectCard: React.FC<ProjectCardProps> = ({
   title,
   description,
   imageUrl,
@@ -36,4 +36,4 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   );
 };
 
-export default ProjectCard;
+export default DashboardProjectCard;

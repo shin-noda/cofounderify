@@ -5,7 +5,7 @@ import type { User } from "firebase/auth";
 interface NavLinksProps {
   user: User | null;
   profileMenuOpen: boolean;
-  toggleProfileMenu: () => void;
+  toggleProfileMenu: (e?: React.MouseEvent) => void; // accept optional event
   profileMenuRef: React.RefObject<HTMLDivElement | null>;
   profileButtonRef: React.RefObject<HTMLButtonElement | null>;
   handleLogout: () => void;
@@ -69,7 +69,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
             ref={profileButtonRef}
             onClick={(e) => {
               e.stopPropagation();
-              toggleProfileMenu();
+              toggleProfileMenu(e);
             }}
             aria-label="Toggle profile menu"
             className={`${
@@ -90,7 +90,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    toggleProfileMenu();
+                    toggleProfileMenu(e);
                   }}
                   aria-label="Close profile menu"
                   className="text-2xl font-normal text-black hover:text-gray-700"
@@ -144,7 +144,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
                   to="/register"
                   onClick={handleLinkClick}
                   className={({ isActive }) =>
-                    `cursor-pointer hover:underline${
+                    `cursor-pointer hover:underline ${
                       isActive ? "underline font-semibold" : ""
                     }`
                   }
