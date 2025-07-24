@@ -17,6 +17,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { validateRequiredFields } from "../../utils/RegisterValidation";
 import { getCountryCode } from "../../utils/countryCodes";
+import RegisterUserAboutMe from "./RegisterUserAboutMe";
 
 const auth = getAuth();
 const db = getFirestore();
@@ -34,6 +35,7 @@ const RegisterCompleteProfileForm: React.FC = () => {
     linkedIn: "",
     skills: [] as string[],
     photoFile: null as File | null,
+    aboutMe: "",
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +70,10 @@ const RegisterCompleteProfileForm: React.FC = () => {
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleAboutMeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, aboutMe: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,6 +113,7 @@ const RegisterCompleteProfileForm: React.FC = () => {
           linkedIn: formData.linkedIn,
           skills: formData.skills,
           photoURL,
+          aboutMe: formData.aboutMe.trim(),
           updatedAt: serverTimestamp(),
         },
         { merge: true }
@@ -159,6 +166,7 @@ const RegisterCompleteProfileForm: React.FC = () => {
       <RegisterLinkedIn value={formData.linkedIn} onChange={handleChange} />
       <RegisterSkills selectedSkills={formData.skills} onChange={handleChange} />
       <RegisterPhotoUpload onChange={handleChange} />
+      <RegisterUserAboutMe value={formData.aboutMe} onChange={handleAboutMeChange} />
 
       <RegisterErrorMessage message={error} />
       <RegisterSubmitButton loading={loading} />

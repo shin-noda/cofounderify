@@ -1,6 +1,6 @@
 import React from "react";
 import type { UserData } from "../../types/UserData";
-import { Mail, MapPin, Linkedin, User, UserCheck, Tag } from "lucide-react";
+import { Mail, MapPin, Linkedin, User, UserCheck, Tag, Info } from "lucide-react";
 import UserProfileImage from "./UserProfileImage";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 
@@ -52,16 +52,17 @@ const UserProfileDisplay: React.FC<UserProfileDisplayProps> = ({
       <div className="flex justify-center w-full">
         <div className="max-w-sm text-sm text-gray-800">
           <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 items-start text-left">
-            <User className="w-5 h-5 text-gray-500 mt-1" />
+
+            <User className="w-5 h-5 text-gray-500" />
             <span>{userData.displayName ?? "N/A"}</span>
 
-            <UserCheck className="w-5 h-5 text-gray-500 mt-1" />
+            <UserCheck className="w-5 h-5 text-gray-500" />
             <span>{`${userData.firstName ?? ""} ${userData.lastName ?? ""}`.trim() || "N/A"}</span>
 
-            <Mail className="w-5 h-5 text-gray-500 mt-1" />
+            <Mail className="w-5 h-5 text-gray-500" />
             <span>{userData.email ?? "N/A"}</span>
 
-            <MapPin className="w-5 h-5 text-gray-500 mt-1" />
+            <MapPin className="w-5 h-5 text-gray-500" />
             <span>
               {userData.city ? `${userData.city}, ` : ""}
               {userData.country ?? "N/A"}
@@ -69,7 +70,7 @@ const UserProfileDisplay: React.FC<UserProfileDisplayProps> = ({
 
             {userData.linkedIn && (
               <>
-                <Linkedin className="w-5 h-5 text-blue-600 mt-1" />
+                <Linkedin className="w-5 h-5 text-blue-600" />
                 <a
                   href={userData.linkedIn}
                   target="_blank"
@@ -83,7 +84,7 @@ const UserProfileDisplay: React.FC<UserProfileDisplayProps> = ({
 
             {skills && skills.length > 0 && (
               <>
-                <Tag className="w-5 h-5 text-gray-600 mt-1" />
+                <Tag className="w-5 h-5 text-gray-600" />
                 <ul className="list-disc ml-4 text-left">
                   {skills.map((skill, idx) => (
                     <li key={idx} className="text-sm">
@@ -93,6 +94,15 @@ const UserProfileDisplay: React.FC<UserProfileDisplayProps> = ({
                 </ul>
               </>
             )}
+
+            {/* New About Me Section */}
+            {userData.aboutMe && (
+              <>
+                <Info className="w-5 h-5 text-gray-600" />
+                <p className="whitespace-pre-wrap text-gray-700">{userData.aboutMe}</p>
+              </>
+            )}
+
           </div>
         </div>
       </div>

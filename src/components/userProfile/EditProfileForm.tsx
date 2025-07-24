@@ -1,4 +1,3 @@
-// src/components/userProfile/EditProfileForm.tsx
 import React, { useState } from "react";
 import { getFirestore, doc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -27,6 +26,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
   const [country, setCountry] = useState(userData.country || "");
   const [linkedIn, setLinkedIn] = useState(userData.linkedIn || "");
   const [skills, setSkills] = useState(userData.skills ? userData.skills.join(", ") : "");
+  const [aboutMe, setAboutMe] = useState(userData.aboutMe || "");
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +49,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
         city: city.trim(),
         country: country.trim(),
         linkedIn: linkedIn.trim(),
+        aboutMe: aboutMe.trim(),
         skills: skills
           .split(",")
           .map((skill) => skill.trim())
@@ -133,7 +134,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
         />
       </label>
 
-      <label className="block mb-4">
+      <label className="block mb-2">
         Skills (comma separated)
         <input
           type="text"
@@ -141,6 +142,17 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
           onChange={(e) => setSkills(e.target.value)}
           placeholder="e.g. JavaScript, React, Design"
           className="w-full border rounded px-3 py-2 mt-1"
+        />
+      </label>
+
+      <label className="block mb-4">
+        About Me
+        <textarea
+          value={aboutMe}
+          onChange={(e) => setAboutMe(e.target.value)}
+          rows={4}
+          className="w-full border rounded px-3 py-2 mt-1 resize-none"
+          placeholder="Tell us about yourself"
         />
       </label>
 

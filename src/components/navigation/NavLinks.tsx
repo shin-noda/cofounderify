@@ -38,11 +38,11 @@ const NavLinks: React.FC<NavLinksProps> = ({
   isMobile = false,
   closeMenu,
 }) => {
-  const profilePhotoURL = userProfile?.photoURL ?? user?.photoURL ?? "";
+  const profilePhotoURL = userProfile?.photoURL ?? "";
 
   const getInitials = () => {
-    if (!user?.displayName) return "U";
-    const names = user.displayName.trim().split(" ");
+    const name = userProfile?.displayName ?? user?.displayName ?? "User";
+    const names = name.trim().split(" ");
     if (names.length === 1) return names[0].charAt(0).toUpperCase();
     return (
       names[0].charAt(0).toUpperCase() + names[1].charAt(0).toUpperCase()
@@ -76,11 +76,11 @@ const NavLinks: React.FC<NavLinksProps> = ({
 
       {user ? (
         <li className="relative flex items-center">
-          {/* Use NavigationProfileLogo if photoURL exists, else initials button */}
-          {user.photoURL ? (
+          {/* Use NavigationProfileLogo if profilePhotoURL exists, else initials button */}
+          {profilePhotoURL ? (
             <NavigationProfileLogo
               photoURL={profilePhotoURL}
-              altText={`${user.displayName ?? "User"}'s profile`}
+              altText={`${userProfile?.displayName ?? user?.displayName ?? "User"}'s profile`}
               onClick={(e) => {
                 e.stopPropagation();
                 toggleProfileMenu();

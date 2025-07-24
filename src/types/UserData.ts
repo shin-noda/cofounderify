@@ -9,5 +9,6 @@ export interface UserData {
   linkedIn?: string;
   skills?: string[];
   photoURL?: string;
+  aboutMe?: string;
   updatedAt?: { seconds: number; nanoseconds: number }; // Firestore timestamp
 }
