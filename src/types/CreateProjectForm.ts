@@ -29,6 +29,9 @@ export interface ProjectFormProps {
   handleSubmit: (e: React.FormEvent) => void;
   locationValiditySetter?: (valid: boolean) => void;
   dateRangeValiditySetter?: (valid: boolean) => void;
+  submitButtonLabel?: string;
+  isEditMode?: boolean;
+  onCancel?: () => void;
 }
 
 export interface CreateProjectFormProps {

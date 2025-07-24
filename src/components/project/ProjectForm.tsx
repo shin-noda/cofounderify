@@ -13,6 +13,7 @@ import ProjectDateRangePicker from "./ProjectDateRangePicker";
 import ProjectLocationType from "./ProjectLocationType";
 import ProjectVirtualTimeZonePicker from "./ProjectVirtualTimeZonePicker";
 import type { ProjectFormProps } from "../../types/CreateProjectForm";
+import DashboardProjectEditCancelButton from "../dashboard/DashboardProjectEditCancelButton";
 
 const ProjectForm: React.FC<ProjectFormProps> = ({
   formState,
@@ -22,10 +23,14 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   handleSubmit,
   locationValiditySetter,
   dateRangeValiditySetter,
+  isEditMode,
+  onCancel,
 }) => {
   return (
     <div className="max-w-md mx-auto mt-8 text-left">
-      <h2 className="text-2xl font-bold mb-4">Create Your Project</h2>
+      <h2 className="text-2xl font-bold mb-4">
+        {isEditMode ? "Edit Your Project" : "Create Your Project"}
+      </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -85,7 +90,12 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
 
         <ProjectSubmitButton
           loading={formState.loading}
+          submitButtonLabel={isEditMode ? "Save Project" : "Create Project"}
         />
+
+        {isEditMode && onCancel && (
+          <DashboardProjectEditCancelButton onCancel={onCancel} />
+        )}
 
       </form>
     </div>

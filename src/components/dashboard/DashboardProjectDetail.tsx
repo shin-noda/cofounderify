@@ -1,7 +1,7 @@
 // src/components/Project/ProjectDetail.tsx
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   getFirestore,
   doc,
@@ -9,6 +9,7 @@ import {
   updateDoc,
   Timestamp,
   arrayUnion,
+  deleteDoc,
 } from "firebase/firestore";
 import { app } from "../../lib/firebase";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
@@ -19,6 +20,8 @@ import DashboardProjectBackButton from "./DashboardProjectBackButton";
 import DashboardProjectRequestMessageSent from "./DashboardProjectRequestMessageSent";
 import DashboardProjectRequestsList from "./DashboardProjectRequestsList";
 import DashboardProjectRolesButtons from "./DashboaredProjectRolesButtons";
+import DashboardEditProjectButton from "./DashboardEditProjectButton";
+import DashboardDeleteProjectButton from "./DashboardDeleteProjectButton";
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -33,6 +36,8 @@ const DashboardProjectDetail: React.FC = () => {
   const [requestSentRole, setRequestSentRole] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasUserRequested, setHasUserRequested] = useState(false);
+
+  const navigate = useNavigate();
 
   // Track auth state
   useEffect(() => {
@@ -167,9 +172,30 @@ const DashboardProjectDetail: React.FC = () => {
     ? "pending"
     : "none";
 
+  const handleDeleteProject = async () => {
+    if (!project?.id) return;
+    const confirm = window.confirm("Are you sure you want to delete this project?");
+    if (!confirm) return;
+
+    try {
+      await deleteDoc(doc(db, "projects", project.id));
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Failed to delete project:", error);
+      alert("Error deleting project.");
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-6 mt-8">
       <DashboardProjectBackButton />
+
+      {isOwner && project.id && (
+        <div className="flex items-center gap-4 mt-4 mb-2">
+          <DashboardEditProjectButton projectId={project.id} />
+          <DashboardDeleteProjectButton projectId={project.id} />
+        </div>
+      )}
 
       <DashboardProjectInfoDisplay project={project} formatDateTime={formatDateTime} />
 

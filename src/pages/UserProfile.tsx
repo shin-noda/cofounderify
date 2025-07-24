@@ -6,13 +6,21 @@ import { app } from "../lib/firebase";
 import type { UserData } from "../types/UserData";
 import EditProfileForm from "../components/userProfile/EditProfileForm";
 
+// Import icons from lucide-react
+import { Mail, MapPin, Linkedin, User, UserCheck, Tag } from "lucide-react";
+import UserProfileDisplay from "../components/userProfile/UserProfileDisplay";
+
 const UserProfile: React.FC = () => {
   const { uid } = useParams<{ uid: string }>();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+
   const auth = getAuth(app);
   const currentUser = auth.currentUser;
-  const [isEditing, setIsEditing] = useState(false);
+  const isOwnProfile = currentUser?.uid === uid;
+
+  const skills = userData?.skills;
 
   const fetchUserData = async () => {
     if (!uid) return;
@@ -37,93 +45,31 @@ const UserProfile: React.FC = () => {
     fetchUserData();
   }, [uid]);
 
-  if (loading) return <div className="p-6">Loading profile...</div>;
+  if (loading) return <div className="p-6 text-center">Loading profile...</div>;
 
   if (!userData)
-    return <div className="p-6">User not found or profile does not exist.</div>;
-
-  const isOwnProfile = currentUser?.uid === uid;
+    return (
+      <div className="p-6 text-center text-red-500">
+        User not found or profile does not exist.
+      </div>
+    );
 
   return (
-    <div className="max-w-2xl mx-auto p-6 flex flex-col items-center">
-      <h1 className="text-2xl font-bold mb-4 text-center w-full">
-        {isOwnProfile ? "Your Profile" : "Profile"}
+    <div className="max-w-2xl mx-auto p-6 flex flex-col items-center text-gray-800">
+      <h1 className="text-3xl font-bold mb-6 text-center w-full">
+        {isOwnProfile ? "Your Profile" : "User Profile"}
       </h1>
 
-      {userData.photoURL && (
-        <img
-          src={userData.photoURL}
-          alt={`${userData.displayName ?? "User"}'s profile`}
-          className="w-32 h-32 rounded-full object-cover mb-4"
-        />
-      )}
-
-      <p className="w-full text-center">
-        <strong>Display Name:</strong> {userData.displayName ?? "N/A"}
-      </p>
-
-      <p className="w-full text-center">
-        <strong>Full Name:</strong>{" "}
-        {userData.firstName ?? ""} {userData.lastName ?? ""}
-      </p>
-
-      <p className="w-full text-center">
-        <strong>Email:</strong> {userData.email ?? "N/A"}
-      </p>
-
-      <p className="w-full text-center">
-        <strong>Location:</strong>{" "}
-        {userData.city ? `${userData.city}, ` : ""}
-        {userData.country ?? ""}
-      </p>
-
-      {userData.linkedIn && (
-        <p className="w-full text-center">
-          <strong>LinkedIn:</strong>{" "}
-          <a
-            href={userData.linkedIn}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline"
-          >
-            {userData.linkedIn}
-          </a>
-        </p>
-      )}
-
-      {userData.skills && userData.skills.length > 0 && (
-        <div className="mt-4 w-full text-center">
-          <strong>Skills:</strong>
-          <br />
-          <ul className="list-disc ml-0 mt-1 inline-block text-left">
-            {userData.skills.map((skill, idx) => (
-              <li key={idx}>{skill}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {isOwnProfile && !isEditing && (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="mt-6 mb-4 px-4 py-2 bg-green-600 text-white rounded"
-        >
-          Edit Profile
-        </button>
-      )}
-
-      {isOwnProfile && isEditing && (
-        <EditProfileForm
-          userData={userData}
-          onSaveSuccess={async () => {
-            setIsEditing(false);
-            await fetchUserData();
-          }}
-          onCancel={() => {
-            setIsEditing(false);
-          }}
-        />
-      )}
+      <UserProfileDisplay
+        userData={userData}
+        isOwnProfile={isOwnProfile}
+        isEditing={isEditing}
+        skills={skills}
+        onEditClick={() => setIsEditing(true)}
+        EditProfileForm={EditProfileForm}
+        fetchUserData={fetchUserData}
+        setIsEditing={setIsEditing}
+      />
     </div>
   );
 };
