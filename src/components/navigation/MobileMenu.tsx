@@ -2,8 +2,15 @@ import React, { useEffect, useRef } from "react";
 import NavLinks from "./NavLinks";
 import type { User } from "firebase/auth";
 
+interface UserProfileData {
+  photoURL?: string | null;
+  displayName?: string | null;
+  // add other fields if needed
+}
+
 type MobileMenuProps = {
   user: User | null;
+  userProfile?: UserProfileData | null;
   isOpen: boolean;
   closeMenu: () => void;
   profileMenuOpen: boolean;
@@ -15,6 +22,7 @@ type MobileMenuProps = {
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
   user,
+  userProfile,
   isOpen,
   closeMenu,
   profileMenuOpen,
@@ -57,6 +65,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     >
       <NavLinks
         user={user}
+        userProfile={userProfile}
         profileMenuOpen={profileMenuOpen}
         toggleProfileMenu={toggleProfileMenu}
         profileMenuRef={profileMenuRef}

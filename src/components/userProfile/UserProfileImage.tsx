@@ -71,13 +71,18 @@ const UserProfileImage: React.FC<Props> = ({ photoURL, displayName, onUpload }) 
   return (
     <>
         {photoURL ? (
-        <img
+        <>
+            <img
             src={photoURL}
             alt={`${displayName ?? "User"}'s profile`}
-            className="w-32 h-32 rounded-full object-cover mb-4 shadow cursor-pointer"
+            className="w-32 h-32 rounded-full object-cover mb-2 shadow cursor-pointer"
             onClick={handleClick}
             title="Click to change profile photo"
-        />
+            />
+            <p className="text-gray-500 text-xs text-center mb-4">
+            (Click the image to update your profile photo.)
+            </p>
+        </>
         ) : (
         <div
             onClick={handleClick}

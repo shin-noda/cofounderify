@@ -1,13 +1,21 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import type { User } from "firebase/auth";
+import NavigationProfileLogo from "./NavigationProfileLogo";
+
+interface UserProfileData {
+  photoURL?: string | null;
+  displayName?: string | null;
+  // Add any other profile fields you use
+}
 
 interface NavLinksProps {
   user: User | null;
+  userProfile?: UserProfileData | null;
   profileMenuOpen: boolean;
   toggleProfileMenu: (e?: React.MouseEvent) => void; // accept optional event
   profileMenuRef: React.RefObject<HTMLDivElement | null>;
-  profileButtonRef: React.RefObject<HTMLButtonElement | null>;
+  profileButtonRef: React.RefObject<HTMLButtonElement | null>; // Change to image ref
   handleLogout: () => void;
   isMobile?: boolean;
   closeMenu?: () => void; // Optional callback to close mobile menu
@@ -21,6 +29,7 @@ const links = [
 
 const NavLinks: React.FC<NavLinksProps> = ({
   user,
+  userProfile,
   profileMenuOpen,
   toggleProfileMenu,
   profileMenuRef,
@@ -29,6 +38,8 @@ const NavLinks: React.FC<NavLinksProps> = ({
   isMobile = false,
   closeMenu,
 }) => {
+  const profilePhotoURL = userProfile?.photoURL ?? user?.photoURL ?? "";
+
   const getInitials = () => {
     if (!user?.displayName) return "U";
     const names = user.displayName.trim().split(" ");
@@ -65,19 +76,32 @@ const NavLinks: React.FC<NavLinksProps> = ({
 
       {user ? (
         <li className="relative flex items-center">
-          <button
-            ref={profileButtonRef}
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleProfileMenu(e);
-            }}
-            aria-label="Toggle profile menu"
-            className={`${
-              isMobile ? "ml-0" : "ml-4"
-            } w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm font-semibold hover:bg-gray-600`}
-          >
-            {getInitials()}
-          </button>
+          {/* Use NavigationProfileLogo if photoURL exists, else initials button */}
+          {user.photoURL ? (
+            <NavigationProfileLogo
+              photoURL={profilePhotoURL}
+              altText={`${user.displayName ?? "User"}'s profile`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleProfileMenu();
+              }}
+              ref={profileButtonRef} // Pass ref here, must match forwarded ref type
+            />
+          ) : (
+            <button
+              ref={profileButtonRef}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleProfileMenu(e);
+              }}
+              aria-label="Toggle profile menu"
+              className={`${
+                isMobile ? "ml-0" : "ml-4"
+              } w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-white text-sm font-semibold hover:bg-gray-600`}
+            >
+              {getInitials()}
+            </button>
+          )}
 
           {profileMenuOpen && (
             <div

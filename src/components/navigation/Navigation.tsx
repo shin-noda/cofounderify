@@ -1,14 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import NavLinks from "./NavLinks";
 import MobileMenu from "./MobileMenu";
 import { useFilter } from "../../context/FilterContext";
+
+interface UserProfileData {
+  photoURL?: string | null;
+  displayName?: string | null;
+  // add other profile fields here if needed
+}
 
 const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfileData | null>(null);
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
@@ -18,10 +26,32 @@ const Navigation: React.FC = () => {
 
   const { setSearchQuery, setFilterRange } = useFilter();
 
-  // Listen for auth state changes
+  // Listen for auth state changes and fetch user profile from Firestore
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const db = getFirestore();
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+
+      if (firebaseUser) {
+        try {
+          const userDocRef = doc(db, "users", firebaseUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            setUserProfile(userDocSnap.data() as UserProfileData);
+          } else {
+            setUserProfile(null);
+          }
+        } catch (error) {
+          console.error("Failed to fetch user profile from Firestore", error);
+          setUserProfile(null);
+        }
+      } else {
+        setUserProfile(null);
+      }
+    });
+
     return unsubscribe;
   }, []);
 
@@ -90,6 +120,7 @@ const Navigation: React.FC = () => {
           <ul className="hidden md:flex space-x-6 items-center">
             <NavLinks
               user={user}
+              userProfile={userProfile}
               profileMenuOpen={profileMenuOpen}
               toggleProfileMenu={toggleProfileMenu}
               profileMenuRef={profileMenuRef}
@@ -117,6 +148,7 @@ const Navigation: React.FC = () => {
         <div className="md:hidden bg-black px-6 pb-4">
           <MobileMenu
             user={user}
+            userProfile={userProfile}
             isOpen={isOpen}
             closeMenu={() => setIsOpen(false)}
             profileMenuOpen={profileMenuOpen}
