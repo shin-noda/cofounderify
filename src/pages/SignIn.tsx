@@ -1,7 +1,13 @@
 // src/pages/SignIn.tsx
 import React, { useState } from "react";
-import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider 
+} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 import {
   SignInEmailInput,
   SignInPasswordInput,
@@ -18,16 +24,28 @@ const SignIn: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
   const auth = getAuth();
+  const db = getFirestore();
   const provider = new GoogleAuthProvider();
+
+  const redirectBasedOnProfile = async (uid: string) => {
+    const userDocRef = doc(db, "users", uid);
+    const userDocSnap = await getDoc(userDocRef);
+    if (userDocSnap.exists()) {
+      navigate("/dashboard");
+    } else {
+      navigate("/completeProfile");
+    }
+  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      await redirectBasedOnProfile(userCredential.user.uid);
     } catch (err: any) {
       setError("Email or password is incorrect.");
     } finally {
@@ -39,24 +57,21 @@ const SignIn: React.FC = () => {
     setError(null);
     setLoading(true);
 
-    // Timeout fallback in case Firebase is slow
     const popupTimeout = setTimeout(() => {
       setLoading(false);
     }, 3000);
 
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
       clearTimeout(popupTimeout);
-      navigate("/dashboard");
+      await redirectBasedOnProfile(result.user.uid);
     } catch (err: any) {
       clearTimeout(popupTimeout);
-
       if (
         err.code === "auth/popup-closed-by-user" ||
         err.code === "auth/cancelled-popup-request"
       ) {
-        // Do nothing, user just closed the popup or clicked too fast
-        return;
+        // Silent cancel
       } else {
         setError(err.message || "Google sign-in failed.");
       }
@@ -78,11 +93,13 @@ const SignIn: React.FC = () => {
       <form onSubmit={handleEmailSignIn} className="space-y-4">
         <SignInEmailInput
           value={email}
+          disabled={loading}
           onChange={(e) => setEmail(e.target.value)} 
         />
 
         <SignInPasswordInput
           value={password}
+          disabled={loading}
           onChange={(e) => setPassword(e.target.value)}
         />
 

@@ -3,6 +3,7 @@ import React from "react";
 
 interface Props {
   value: string;
+  disabled?: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
