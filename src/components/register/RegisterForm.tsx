@@ -1,7 +1,14 @@
 // src/components/register/RegisterForm.tsx
 import React, { useState } from "react";
-import { getAuth, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  sendEmailVerification,
+} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 import {
   RegisterErrorMessage,
   RegisterLinkToSignIn,
@@ -11,8 +18,10 @@ import {
   RegisterEmailInput,
   RegisterPasswordInput,
 } from ".";
+import { toast } from "react-hot-toast";
 
 const auth = getAuth();
+const db = getFirestore();
 const provider = new GoogleAuthProvider();
 
 const RegisterForm: React.FC = () => {
@@ -28,8 +37,12 @@ const RegisterForm: React.FC = () => {
     setError(null);
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigate("/completeProfile");
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      if (userCredential.user) {
+        await sendEmailVerification(userCredential.user);
+        toast.success("Verification email sent! Please check your inbox.");
+        navigate("/checkEmailVerification"); // A page you create to instruct email verification
+      }
     } catch (err: any) {
       setError(err.message || "Failed to register");
     } finally {
@@ -42,21 +55,30 @@ const RegisterForm: React.FC = () => {
     setLoading(true);
 
     const popupTimeout = setTimeout(() => {
-      setLoading(false); // fallback in case of freeze
+      setLoading(false);
     }, 3000);
 
     try {
-      await signInWithPopup(auth, provider);
-      clearTimeout(popupTimeout);
-      navigate("/completeProfile");
-    } catch (err: any) {
+      const result = await signInWithPopup(auth, provider);
       clearTimeout(popupTimeout);
 
+      const user = result.user;
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        toast.success("Welcome back! You've already registered.");
+        navigate("/dashboard");
+      } else {
+        navigate("/completeProfile");
+      }
+    } catch (err: any) {
+      clearTimeout(popupTimeout);
       if (
         err.code === "auth/popup-closed-by-user" ||
         err.code === "auth/cancelled-popup-request"
       ) {
-        // Silent cancel — don't show error
+        // Silent cancel
       } else {
         setError(err.message || "Google sign-up failed.");
       }
@@ -69,10 +91,7 @@ const RegisterForm: React.FC = () => {
     <div>
       <RegisterErrorMessage message={error} />
 
-      <RegisterGoogleButton
-        onClick={handleGoogleRegister}
-        disabled={loading}
-      />
+      <RegisterGoogleButton onClick={handleGoogleRegister} disabled={loading} />
 
       <RegisterDividerOr />
 

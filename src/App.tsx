@@ -1,5 +1,6 @@
 // src/App.tsx
 import { Route, Routes, useNavigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 import {
   CreateProjectForm,
@@ -22,13 +23,14 @@ import PrivateRoute from "./components/privateRoute/PrivateRoute";
 import RegisterCompleteProfileForm from "./components/register/RegisterCompleteProfileForm";
 import UserProfile from "./pages/UserProfile";
 
-import { FilterProvider } from "./context/FilterContext";  // <-- import the new context provider
+import { FilterProvider } from "./context/FilterContext";
+import CheckEmailVerification from "./pages/CheckEmailVerification";
 
 function App() {
   const navigate = useNavigate();
 
   return (
-    <FilterProvider> {/* Wrap the entire app so context is available everywhere */}
+    <FilterProvider>
       <div className="min-h-screen flex flex-col">
         <Navigation />
 
@@ -52,18 +54,17 @@ function App() {
                 element={
                   <CreateProjectForm
                     onSuccess={() => {
-                      navigate("/dashboard"); // redirect after project creation
+                      navigate("/dashboard");
                     }}
                   />
                 }
               />
               <Route path="/project/:id" element={<DashboardProjectDetail />} />
-
-              {/* Add complete profile route here */}
               <Route path="/completeProfile" element={<RegisterCompleteProfileForm />} />
-
               <Route path="/profile/:uid" element={<UserProfile />} />
             </Route>
+
+            <Route path="/checkEmailVerification" element={<CheckEmailVerification />} />
 
             {/* NotFound page */}
             <Route path="*" element={<NotFound />} />
@@ -77,6 +78,8 @@ function App() {
         />
 
         <CookieConsent />
+
+        <Toaster position="top-center" reverseOrder={false} />
       </div>
     </FilterProvider>
   );
