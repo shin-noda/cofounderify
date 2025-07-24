@@ -131,7 +131,7 @@ const ProjectAutocompleteLocationPicker: React.FC<ExtendedAutocompleteLocationPi
         </ul>
       )}
 
-      <div className="h-48 w-full rounded border overflow-hidden">
+      <div className="h-48 w-full rounded border overflow-hidden z-0">
         <MapContainer
           center={location ? [location.lat, location.lng] : [20, 0]}
           zoom={location ? 12 : 2}

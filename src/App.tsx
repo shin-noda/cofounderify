@@ -25,6 +25,9 @@ import UserProfile from "./pages/UserProfile";
 
 import { FilterProvider } from "./context/FilterContext";
 import CheckEmailVerification from "./pages/CheckEmailVerification";
+import SignInForgotPassword from "./components/signIn/SignInForgotPassword";
+import YourProjects from "./pages/YourProjects";
+import PublicFeed from "./pages/PublicFeed";
 
 function App() {
   const navigate = useNavigate();
@@ -38,14 +41,16 @@ function App() {
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/feed" element={<PublicFeed />} />
             <Route path="/register" element={<Register />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfUse />} />
-            <Route path="/cookie-policy" element={<CookiePolicy />} />
+            <Route path="/cookiePolicy" element={<CookiePolicy />} />
+            <Route path="/checkEmailVerification" element={<CheckEmailVerification />} />
+            <Route path="/forgotPassword" element={<SignInForgotPassword />} />
 
             {/* Protected routes */}
             <Route element={<PrivateRoute />}>
@@ -59,12 +64,12 @@ function App() {
                   />
                 }
               />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/project/:id" element={<DashboardProjectDetail />} />
               <Route path="/completeProfile" element={<RegisterCompleteProfileForm />} />
               <Route path="/profile/:uid" element={<UserProfile />} />
+              <Route path="/myProjects" element={<YourProjects />} />
             </Route>
-
-            <Route path="/checkEmailVerification" element={<CheckEmailVerification />} />
 
             {/* NotFound page */}
             <Route path="*" element={<NotFound />} />

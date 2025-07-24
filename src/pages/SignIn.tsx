@@ -17,6 +17,7 @@ import {
   SignInErrorMessage,
   SignInLinkToRegister,
 } from "../components/signIn";
+import SignInLinkToForgotPassword from "../components/signIn/SignInLinkToForgotPassword";
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -105,6 +106,8 @@ const SignIn: React.FC = () => {
 
         <SignInSubmitButton loading={loading} />
       </form>
+
+      <SignInLinkToForgotPassword />
 
       <SignInLinkToRegister />
     </div>
