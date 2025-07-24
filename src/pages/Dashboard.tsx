@@ -1,11 +1,23 @@
 import React, { useEffect, useRef } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useFilter } from "../context/FilterContext";
-import { getInitialFilters, syncFiltersToURL, applyAllFilters, getPresetRange } from "../helpers/filterUtils";
-import { getFirestore, collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import {
+  getInitialFilters,
+  syncFiltersToURL,
+  applyAllFilters,
+  getPresetRange,
+} from "../utils/filterUtils";
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+} from "firebase/firestore";
 import { app } from "../lib/firebase";
-import AllFilterProject from "../components/dashboard/DashboardAllFilterProject";
-import ProjectList from "../components/dashboard/DashboardProjectList";
+import DashboardAllFilterProject from "../components/dashboard/DashboardAllFilterProject";
+import DashboardProjectList from "../components/dashboard/DashboardProjectList";
+import DashboardProjectHeader from "../components/dashboard/DashboardProjectHeader";
 
 const db = getFirestore(app);
 
@@ -14,7 +26,15 @@ function datesAreEqual(d1: Date, d2: Date) {
 }
 
 const Dashboard: React.FC = () => {
+  const [locationFilter, setLocationFilter] = React.useState("");
+  const [projects, setProjects] = React.useState<any[]>([]);
+  const [locationTypeFilter, setLocationTypeFilter] = React.useState<
+  "in-person" | "virtual" | "hybrid" | ""
+>("");
   const [searchParams, setSearchParams] = useSearchParams();
+  const isInitializing = useRef(true);
+  const location = useLocation();
+
   const {
     roleFilter,
     setRoleFilter,
@@ -28,8 +48,22 @@ const Dashboard: React.FC = () => {
     setRangeKeyword,
   } = useFilter();
 
-  const [projects, setProjects] = React.useState<any[]>([]);
-  const isInitializing = useRef(true);
+  const filteredProjects = applyAllFilters({
+    projects,
+    searchQuery,
+    filterRange,
+    roleFilter,
+    memberCountFilter,
+    locationFilter,
+    locationTypeFilter,
+  });
+
+  const uniqueLocationLabels = React.useMemo(() => {
+    const labels = projects
+      .map((p) => p.location?.label)
+      .filter((label): label is string => Boolean(label));
+    return Array.from(new Set(labels)).sort((a, b) => a.localeCompare(b));
+  }, [projects]);
 
   useEffect(() => {
     const {
@@ -45,6 +79,12 @@ const Dashboard: React.FC = () => {
     setMemberCountFilter(initialMembers);
     setRangeKeyword(initialRangeKeyword);
 
+    // New: Set initial location filter from URL
+    const locationParam = searchParams.get("location");
+    if (locationParam) {
+      setLocationFilter(locationParam);
+    }
+
     if (initialFilterRange) {
       setFilterRange(initialFilterRange);
     } else {
@@ -52,10 +92,13 @@ const Dashboard: React.FC = () => {
     }
 
     isInitializing.current = false;
-  }, [searchParams, setSearchQuery, setRoleFilter, setMemberCountFilter, setRangeKeyword, setFilterRange]);
+  }, [searchParams]);
 
   useEffect(() => {
-    const q = query(collection(db, "projects"), orderBy("startDateTime", "desc"));
+    const q = query(
+      collection(db, "projects"),
+      orderBy("startDateTime", "desc")
+    );
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const projectsData = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -66,7 +109,17 @@ const Dashboard: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // Sync state to URL except on initial load
+  useEffect(() => {
+    if (isInitializing.current) return;
+    const params = new URLSearchParams(searchParams);
+    if (locationFilter) {
+      params.set("location", locationFilter);
+    } else {
+      params.delete("location");
+    }
+    setSearchParams(params);
+  }, [locationFilter]);
+
   useEffect(() => {
     if (isInitializing.current) return;
     syncFiltersToURL({
@@ -77,15 +130,18 @@ const Dashboard: React.FC = () => {
       rangeKeyword,
       setSearchParams,
     });
-  }, [roleFilter, memberCountFilter, searchQuery, filterRange, rangeKeyword, setSearchParams]);
+  }, [
+    roleFilter,
+    memberCountFilter,
+    searchQuery,
+    filterRange,
+    rangeKeyword,
+  ]);
 
-  // Manage filterRange based on rangeKeyword — simplified, no "custom" case
   useEffect(() => {
     if (isInitializing.current) return;
-
     if (rangeKeyword) {
       const presetRange = getPresetRange(rangeKeyword);
-
       if (
         !filterRange ||
         !datesAreEqual(filterRange.start, presetRange!.start) ||
@@ -94,9 +150,8 @@ const Dashboard: React.FC = () => {
         setFilterRange(presetRange);
       }
     }
-  }, [rangeKeyword, filterRange, setFilterRange]);
+  }, [rangeKeyword, filterRange]);
 
-  const location = useLocation();
   useEffect(() => {
     if (!location.pathname.startsWith("/dashboard")) {
       setSearchQuery("");
@@ -106,21 +161,17 @@ const Dashboard: React.FC = () => {
       setMemberCountFilter("All");
       isInitializing.current = true;
     }
-  }, [location.pathname, setSearchQuery, setFilterRange, setRangeKeyword, setRoleFilter, setMemberCountFilter]);
-
-  const filteredProjects = applyAllFilters({
-    projects,
-    searchQuery,
-    filterRange,
-    roleFilter,
-    memberCountFilter,
-  });
+  }, [location.pathname]);
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-6 text-center">Projects</h1>
+      <DashboardProjectHeader
+        locationFilter={locationFilter}
+        setLocationFilter={setLocationFilter}
+        availableLocations={uniqueLocationLabels}
+      />
 
-      <AllFilterProject
+      <DashboardAllFilterProject
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         filterRange={filterRange}
@@ -131,10 +182,12 @@ const Dashboard: React.FC = () => {
         setRoleFilter={setRoleFilter}
         memberCountFilter={memberCountFilter}
         setMemberCountFilter={setMemberCountFilter}
+        locationTypeFilter={locationTypeFilter}
+        setLocationTypeFilter={setLocationTypeFilter} 
         filteredCount={filteredProjects.length}
       />
 
-      <ProjectList projects={filteredProjects} />
+      <DashboardProjectList projects={filteredProjects} />
     </>
   );
 };

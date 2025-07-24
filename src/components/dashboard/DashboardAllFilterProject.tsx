@@ -1,10 +1,11 @@
 // src/components/dashboard/AllFilterProject.tsx
 import React from "react";
-import SearchBar from "./DashboardSearchBar";
+import DashboardSearchBar from "./DashboardSearchBar";
 import DashboardFilterProject from "./DashboardFilterProjectDate";
 import DashboardFilterRole from "./DashboardFilterRole";
 import DashboardFilterMember from "./DashboardFilterMember";
 import { type FilterRange, type RangeKeyword } from "../../context/FilterContext";
+import DashboardFilterLocationType from "./DashboardFilterLocationType";
 
 interface Props {
   searchQuery: string;
@@ -18,6 +19,10 @@ interface Props {
   memberCountFilter: string;
   setMemberCountFilter: React.Dispatch<React.SetStateAction<string>>;
   filteredCount: number;
+  locationTypeFilter: "in-person" | "virtual" | "hybrid" | "";
+  setLocationTypeFilter: React.Dispatch<
+    React.SetStateAction<"in-person" | "virtual" | "hybrid" | "">
+  >;
 }
 
 const DashboardAllFilterProject: React.FC<Props> = ({
@@ -31,13 +36,15 @@ const DashboardAllFilterProject: React.FC<Props> = ({
   setRoleFilter,
   memberCountFilter,
   setMemberCountFilter,
+  locationTypeFilter,
+  setLocationTypeFilter,
   filteredCount,
 }) => {
   return (
     <div className="max-w-md w-full mx-auto mb-6">
       {/* 1st row: SearchBar */}
       <div className="mb-4">
-        <SearchBar value={searchQuery} onSearch={setSearchQuery} placeholder="Search projects..." />
+        <DashboardSearchBar value={searchQuery} onSearch={setSearchQuery} placeholder="Search projects..." />
       </div>
 
       {/* 2nd row: filters */}
@@ -50,6 +57,10 @@ const DashboardAllFilterProject: React.FC<Props> = ({
         />
         <DashboardFilterRole value={roleFilter} onChange={setRoleFilter} />
         <DashboardFilterMember value={memberCountFilter} onChange={setMemberCountFilter} />
+        <DashboardFilterLocationType
+          value={locationTypeFilter}
+          onChange={setLocationTypeFilter}
+        />
       </div>
 
       <div className="text-sm text-gray-600 font-medium mt-3 text-center">

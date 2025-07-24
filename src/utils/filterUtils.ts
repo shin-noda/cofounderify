@@ -1,4 +1,4 @@
-// src/helpers/filterUtils.ts
+// src/utils/filterUtils.ts
 import { type FilterRange } from "../context/FilterContext";
 import { addDays, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 
@@ -20,7 +20,6 @@ export function getPresetRange(range: RangeKeyword): FilterRange | null {
       return { start, end };
     }
     case "thisWeek": {
-      // Week starts on Sunday (0)
       const start = startOfWeek(now, { weekStartsOn: 0 });
       const end = endOfWeek(now, { weekStartsOn: 0 });
       return { start: startOfDay(start), end: endOfDay(end) };
@@ -83,25 +82,40 @@ export function syncFiltersToURL({
   setSearchParams(params);
 }
 
-// Filters the projects array according to all active filters
+const validParticipationTypes = ["in-person", "virtual", "hybrid"] as const;
+type ParticipationType = typeof validParticipationTypes[number];
+
 export function applyAllFilters({
   projects,
   searchQuery,
   filterRange,
   roleFilter,
   memberCountFilter,
+  locationFilter,
+  locationTypeFilter = "", // default empty string
 }: {
   projects: any[];
   searchQuery: string;
   filterRange: FilterRange | null;
   roleFilter: string;
   memberCountFilter: string;
+  locationFilter: string;
+  locationTypeFilter?: ParticipationType | "" | undefined;
 }) {
+  const now = new Date();
+
   return projects
+    // Exclude past projects
+    .filter((proj) => {
+      const projectEnd = proj.endDateTime ? new Date(proj.endDateTime) : new Date(proj.startDateTime);
+      return projectEnd >= now;
+    })
+    // Search by title or description
     .filter((proj) =>
       proj.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       proj.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
+    // Date range filter
     .filter((proj) => {
       if (!filterRange) return true;
 
@@ -118,10 +132,12 @@ export function applyAllFilters({
         return projectEnd >= filterRange.start && projectStart <= filterRange.end;
       }
     })
+    // Role filter
     .filter((proj) => {
       if (roleFilter === "All") return true;
       return proj.roles?.includes(roleFilter);
     })
+    // Member count filter
     .filter((proj) => {
       if (memberCountFilter === "All") return true;
       const count = proj.memberCount || 0;
@@ -129,5 +145,20 @@ export function applyAllFilters({
       if (memberCountFilter === "3-5") return count >= 3 && count <= 5;
       if (memberCountFilter === "6+") return count >= 6;
       return true;
+    })
+    // Location label filter
+    .filter((proj) => {
+      if (!locationFilter) return true;
+      return proj.location?.label === locationFilter;
+    })
+    // Participation type filter with explicit type guard
+    .filter((proj) => {
+      if (!locationTypeFilter) return true; // covers "" and undefined
+
+      if (!validParticipationTypes.includes(locationTypeFilter as ParticipationType)) {
+        return true; // ignore invalid filters defensively
+      }
+
+      return proj.participationType === locationTypeFilter;
     });
 }
