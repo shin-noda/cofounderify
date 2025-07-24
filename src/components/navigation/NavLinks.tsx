@@ -84,7 +84,7 @@ const NavLinks: React.FC<NavLinksProps> = ({
               ref={profileMenuRef}
               className={`absolute ${
                 isMobile ? "left-0" : "right-0"
-              } top-full mt-2 w-40 bg-white text-black rounded shadow-lg z-50 p-2`}
+              } top-full mt-2 w-48 bg-white text-black rounded shadow-lg z-50 p-2`}
             >
               <div className="flex justify-end">
                 <button
@@ -108,6 +108,17 @@ const NavLinks: React.FC<NavLinksProps> = ({
                 className="mt-2 block w-full text-left px-4 py-2 hover:bg-gray-200"
               >
                 View Profile
+              </NavLink>
+
+              <NavLink
+                to="/myProjects"
+                onClick={() => {
+                  toggleProfileMenu();
+                  if (isMobile && closeMenu) closeMenu();
+                }}
+                className="mt-2 block w-full text-left px-4 py-2 hover:bg-gray-200"
+              >
+                View Your Projects
               </NavLink>
 
               <button
