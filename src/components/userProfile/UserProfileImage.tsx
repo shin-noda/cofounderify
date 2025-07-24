@@ -16,8 +16,11 @@ const UserProfileImage: React.FC<Props> = ({ photoURL, displayName, onUpload }) 
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleClick = () => {
-    fileInputRef.current?.click();
-  };
+    if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Clear previous value
+        fileInputRef.current.click();
+    }
+    };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,52 +67,52 @@ const UserProfileImage: React.FC<Props> = ({ photoURL, displayName, onUpload }) 
     };
   }, [previewUrl]);
 
-  // If photoURL exists (from user profile), show that image
-  if (photoURL) {
-    return (
-      <img
-        src={photoURL}
-        alt={`${displayName ?? "User"}'s profile`}
-        className="w-32 h-32 rounded-full object-cover mb-4 shadow cursor-pointer"
-        onClick={handleClick}
-        title="Click to change profile photo"
-      />
-    );
-  }
-
   // If no photoURL, show upload box with optional preview and error
   return (
-    <div>
-      <div
-        onClick={handleClick}
-        className="w-32 h-32 mb-4 rounded-full border-2 border-dashed border-gray-400 flex items-center justify-center text-center text-gray-500 cursor-pointer hover:border-gray-600 hover:text-gray-700 transition select-none"
-        title="Upload profile photo"
-      >
-        {uploading ? (
-          <span>Uploading...</span>
-        ) : previewUrl ? (
-          <img
-            src={previewUrl}
-            alt="Preview"
-            className="w-32 h-32 rounded-full object-cover"
-          />
+    <>
+        {photoURL ? (
+        <img
+            src={photoURL}
+            alt={`${displayName ?? "User"}'s profile`}
+            className="w-32 h-32 rounded-full object-cover mb-4 shadow cursor-pointer"
+            onClick={handleClick}
+            title="Click to change profile photo"
+        />
         ) : (
-          "Upload photo"
+        <div
+            onClick={handleClick}
+            className="w-32 h-32 mb-4 rounded-full border-2 border-dashed border-gray-400 flex items-center justify-center text-center text-gray-500 cursor-pointer hover:border-gray-600 hover:text-gray-700 transition select-none"
+            title="Upload profile photo"
+        >
+            {uploading ? (
+            <span>Uploading...</span>
+            ) : previewUrl ? (
+            <img
+                src={previewUrl}
+                alt="Preview"
+                className="w-32 h-32 rounded-full object-cover"
+            />
+            ) : (
+            "Upload photo"
+            )}
+        </div>
         )}
-      </div>
-      <input
+
+        {/* Always render hidden file input */}
+        <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
         onChange={handleFileChange}
         className="hidden"
         disabled={uploading}
-      />
-      {uploadError && (
+        />
+
+        {uploadError && (
         <p className="text-red-600 text-xs text-center mt-1">{uploadError}</p>
-      )}
-    </div>
-  );
+        )}
+    </>
+    );
 };
 
 export default UserProfileImage;
