@@ -5,9 +5,6 @@ import { getAuth } from "firebase/auth";
 import { app } from "../lib/firebase";
 import type { UserData } from "../types/UserData";
 import EditProfileForm from "../components/userProfile/EditProfileForm";
-
-// Import icons from lucide-react
-import { Mail, MapPin, Linkedin, User, UserCheck, Tag } from "lucide-react";
 import UserProfileDisplay from "../components/userProfile/UserProfileDisplay";
 
 const UserProfile: React.FC = () => {
@@ -62,6 +59,7 @@ const UserProfile: React.FC = () => {
 
       <UserProfileDisplay
         userData={userData}
+        uid={uid!}
         isOwnProfile={isOwnProfile}
         isEditing={isEditing}
         skills={skills}
