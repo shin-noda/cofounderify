@@ -10,8 +10,10 @@ export interface CreateProjectFormState {
   location: {
     lat: number;
     lng: number;
-    address?: string; // optional here
+    address?: string;
   } | null;
+  participationType: string;
+  virtualTimeZone?: string;
   startDateTime: string;
   endDateTime: string;
 }

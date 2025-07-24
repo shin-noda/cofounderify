@@ -6,12 +6,10 @@ const Contact: React.FC = () => {
       <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
       <p className="mb-4">
         We'd love to hear from you!  
-        For any inquiries, feedback, or support, please email us at  
-        <a href="mailto:support@cofounderify.com" className="text-blue-600 hover:underline">
-          support@cofounderify.com
+        For any inquiries, feedback, or support, please email us at  <a href="mailto:support@cofounderify.com" className="text-blue-600 hover:underline">
+          cofounderify@gmail.com
         </a>.
       </p>
-      <p>Or just say hi on social media — coming soon!</p>
     </div>
   );
 };

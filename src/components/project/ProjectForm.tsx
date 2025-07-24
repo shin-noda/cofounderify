@@ -10,6 +10,8 @@ import {
   ProjectSubmitButton,
 } from ".";
 import ProjectDateRangePicker from "./ProjectDateRangePicker";
+import ProjectLocationType from "./ProjectLocationType";
+import ProjectVirtualTimeZonePicker from "./ProjectVirtualTimeZonePicker";
 import type { ProjectFormProps } from "../../types/CreateProjectForm";
 
 const ProjectForm: React.FC<ProjectFormProps> = ({
@@ -31,7 +33,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
           value={formState.title}
           onChange={(val) => setField("title", val)}
         />
-        
+
         <ProjectMemberCountInput
           value={formState.memberCount}
           onChange={handleMemberCountChange}
@@ -51,11 +53,25 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
           onFileChange={(file) => setField("imageUrl", file || "")}
         />
 
-        <ProjectAutocompleteLocationPicker
-          location={formState.location}
-          onChange={(loc) => setField("location", loc)}
-          onValidChange={locationValiditySetter}
+        {/* Participation type selector */}
+        <ProjectLocationType
+          value={formState.participationType}
+          onChange={(val) => setField("participationType", val)}
         />
+
+        {/* Conditionally render location picker or virtual timezone picker */}
+        {formState.participationType === "virtual" ? (
+          <ProjectVirtualTimeZonePicker
+  value={formState.virtualTimeZone ?? ""}
+            onChange={(val) => setField("virtualTimeZone", val)}
+          />
+        ) : (
+          <ProjectAutocompleteLocationPicker
+            location={formState.location}
+            onChange={(loc) => setField("location", loc)}
+            onValidChange={locationValiditySetter}
+          />
+        )}
 
         <ProjectDateRangePicker
           startDateTime={formState.startDateTime}

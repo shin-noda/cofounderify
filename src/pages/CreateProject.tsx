@@ -4,6 +4,7 @@ import { getAuth } from "firebase/auth";
 import { app } from "../lib/firebase";
 
 import type { CreateProjectFormProps, CreateProjectFormState } from "../types/CreateProjectForm";
+import { structureLocation } from "../utils/structureLocation";
 import ProjectForm from "../components/project/ProjectForm";
 
 const db = getFirestore(app);
@@ -18,6 +19,8 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
     imageUrl: "",
     loading: false,
     location: null,
+    participationType: "in-person",
+    virtualTimeZone: "",
     startDateTime: "",
     endDateTime: "",
   };
@@ -53,16 +56,10 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
     });
   }, []);
 
-  const handleDateRangeChange = useCallback((start: string, end: string, isValid: boolean) => {
-    setField("startDateTime", start);
-    setField("endDateTime", end);
-    setIsValidDateRange(isValid);
-  }, [setField]);
-
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formState.location || !isValidLocation) {
+    if (formState.participationType !== "virtual" && (!formState.location || !isValidLocation)) {
       alert("Please select a valid location from the suggestions.");
       return;
     }
@@ -88,14 +85,32 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
       return;
     }
 
+    if (formState.participationType === "virtual" && !formState.virtualTimeZone) {
+      alert("Please select a valid virtual timezone.");
+      return;
+    }
+
     try {
       const imageUrl = formState.imageUrl || "";
+
+      let structured = null;
+      if (formState.location?.lat && formState.location?.lng) {
+        structured = await structureLocation(formState.location.lat, formState.location.lng);
+      }
+
+      const locationLabel =
+        structured?.city && structured?.region
+          ? `${structured.city}, ${structured.region}`
+          : structured?.city || structured?.region || structured?.country || "Unknown";
+
 
       const location = formState.location
         ? {
             lat: formState.location.lat,
             lng: formState.location.lng,
             address: formState.location.address ?? null,
+            structured: structured ?? null,
+            label: locationLabel,
           }
         : null;
 
@@ -106,6 +121,8 @@ const CreateProject: React.FC<CreateProjectFormProps> = ({ onSuccess }) => {
         description: formState.description,
         imageUrl,
         location,
+        participationType: formState.participationType,
+        virtualTimeZone: formState.participationType === "virtual" ? formState.virtualTimeZone : null,
         startDateTime: formState.startDateTime,
         endDateTime: formState.endDateTime,
         ownerId: user.uid,
