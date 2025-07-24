@@ -1,9 +1,12 @@
 import React from "react";
 import type { UserData } from "../../types/UserData";
 import { Mail, MapPin, Linkedin, User, UserCheck, Tag } from "lucide-react";
+import UserProfileImage from "./UserProfileImage";
+import { doc, getFirestore, updateDoc } from "firebase/firestore";
 
 interface UserProfileDisplayProps {
   userData: UserData;
+  uid: string;
   isOwnProfile: boolean;
   isEditing: boolean;
   skills?: string[];
@@ -19,6 +22,7 @@ interface UserProfileDisplayProps {
 
 const UserProfileDisplay: React.FC<UserProfileDisplayProps> = ({
   userData,
+  uid,
   isOwnProfile,
   isEditing,
   skills,
@@ -29,13 +33,21 @@ const UserProfileDisplay: React.FC<UserProfileDisplayProps> = ({
 }) => {
   return (
     <>
-      {userData.photoURL && (
-        <img
-          src={userData.photoURL}
-          alt={`${userData.displayName ?? "User"}'s profile`}
-          className="w-32 h-32 rounded-full object-cover mb-4 shadow"
-        />
-      )}
+      <UserProfileImage
+        photoURL={userData.photoURL}
+        displayName={userData.displayName}
+        onUpload={async (uploadedUrl) => {
+          if (!uploadedUrl) return;
+
+          const db = getFirestore();
+          const userRef = doc(db, "users", uid);
+          await updateDoc(userRef, {
+            photoURL: uploadedUrl,
+          });
+
+          await fetchUserData();
+        }}
+      />
 
       <div className="flex justify-center w-full">
         <div className="max-w-sm text-sm text-gray-800">
