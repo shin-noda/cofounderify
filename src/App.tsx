@@ -41,7 +41,6 @@ function App() {
         <main className="flex-grow pt-20 pb-12 p-4 bg-gray-50">
           <Routes>
             {/* Public routes */}
-            <Route path="/" element={<Register />} />
             <Route path="/feed" element={<PublicFeed />} />
             <Route path="/register" element={<Register />} />
             <Route path="/signin" element={<SignIn />} />
@@ -55,6 +54,9 @@ function App() {
 
             {/* Protected routes */}
             <Route element={<PrivateRoute />}>
+              {/* Redirect / to Dashboard */}
+              <Route path="/" element={<Dashboard />} />
+
               <Route
                 path="/create"
                 element={
