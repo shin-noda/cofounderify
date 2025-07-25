@@ -6,9 +6,9 @@ import {
   getFirestore,
   doc,
   onSnapshot,
-  updateDoc,
   Timestamp,
-  arrayUnion,
+  collection,
+  addDoc,
 } from "firebase/firestore";
 import { app } from "../../lib/firebase";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
@@ -46,12 +46,7 @@ const DashboardProjectDetail: React.FC = () => {
 
   // Load project by ID and track updates
   useEffect(() => {
-    if (!id) {
-      console.error("Project ID is missing.");
-      setProject(null);
-      setLoading(false);
-      return;
-    }
+    if (!id || user === undefined) return; // wait until user state is known
 
     setLoading(true);
     const docRef = doc(db, "projects", id);
@@ -76,6 +71,7 @@ const DashboardProjectDetail: React.FC = () => {
 
       setProject(fullProject);
 
+      // Only update if user is present
       if (user) {
         const existingRequest = requests.find((r) => r.uid === user.uid);
         setHasUserRequested(!!existingRequest);
@@ -113,14 +109,20 @@ const DashboardProjectDetail: React.FC = () => {
       timestamp: Timestamp.now(),
     };
 
-    const docRef = doc(db, "projects", project.id);
-    await updateDoc(docRef, {
-      requests: arrayUnion(request),
-    });
+    try {
+      // Reference to the requests subcollection
+      const requestsColRef = collection(db, "projects", project.id, "requests");
 
-    setRequestSentRole(selectedRole);
-    setHasUserRequested(true);
-    setIsModalOpen(false);
+      // Add a new document to the requests subcollection
+      await addDoc(requestsColRef, request);
+
+      setRequestSentRole(selectedRole);
+      setHasUserRequested(true);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error sending join request:", error);
+      alert("Failed to send join request. Please try again.");
+    }
   };
 
   const formatDateTime = (value?: Timestamp | Date | string | null) => {
@@ -193,7 +195,7 @@ const DashboardProjectDetail: React.FC = () => {
       />
 
       {isOwner && project.id && project.requests && (
-        <DashboardProjectRequestsList projectId={project.id} requests={project.requests} />
+        <DashboardProjectRequestsList projectId={project.id} />
       )}
 
       {isModalOpen && (
