@@ -29,6 +29,7 @@ import SignInForgotPassword from "./components/signIn/SignInForgotPassword";
 import YourProjects from "./pages/YourProjects";
 import PublicFeed from "./pages/PublicFeed";
 import DashboardEditProject from "./components/dashboard/DashboardEditProject";
+import OtherUserProfile from "./pages/OtherUserProfile";
 
 function App() {
   const navigate = useNavigate();
@@ -73,6 +74,7 @@ function App() {
               <Route path="/profile/:uid" element={<UserProfile />} />
               <Route path="/myProjects" element={<YourProjects />} />
               <Route path="/edit/:projectId" element={<DashboardEditProject />} />
+              <Route path="/otheruserprofile/:uid" element={<OtherUserProfile />} />
             </Route>
 
             {/* NotFound page */}
