@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { validateRequiredFields } from "../../utils/RegisterValidation";
 import { getCountryCode } from "../../utils/countryCodes";
 import RegisterUserAboutMe from "./RegisterUserAboutMe";
+import RegisterAgreement from "./RegisterAgreement";
 
 const auth = getAuth();
 const db = getFirestore();
@@ -170,6 +171,8 @@ const RegisterCompleteProfileForm: React.FC = () => {
 
       <RegisterErrorMessage message={error} />
       <RegisterSubmitButton loading={loading} />
+
+      <RegisterAgreement />
     </form>
   );
 };
